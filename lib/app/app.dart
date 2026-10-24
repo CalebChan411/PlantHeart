@@ -13,15 +13,26 @@ class PlantHeartApp extends StatelessWidget {
   final PlantController controller;
   const PlantHeartApp({super.key, required this.controller});
   @override
-  Widget build(BuildContext context) => AnimatedBuilder(
-    animation: controller,
-    builder: (context, _) => MaterialApp(
-      title: 'Plant Heart',
-      debugShowCheckedModeBanner: false,
-      theme: plantTheme(),
-      builder: (context, child) {
-        final media = MediaQuery.of(context);
-        return MediaQuery(
+  Widget build(BuildContext context) => MaterialApp(
+    title: 'Plant Heart',
+    debugShowCheckedModeBanner: false,
+    theme: plantTheme(),
+    builder: (context, child) {
+      final media = MediaQuery.of(context);
+      // Preserve the navigator subtree during data writes. Only a changed
+      // accessibility preference should invalidate inherited text scaling.
+      return AnimatedBuilder(
+        animation: controller,
+        child: ColoredBox(
+          color: const Color(0xFFEAF0E5),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: child!,
+            ),
+          ),
+        ),
+        builder: (context, frame) => MediaQuery(
           data: media.copyWith(
             textScaler: TextScaler.linear(
               (media.textScaler.scale(14) /
@@ -30,19 +41,11 @@ class PlantHeartApp extends StatelessWidget {
                   .clamp(1, 2),
             ),
           ),
-          child: ColoredBox(
-            color: const Color(0xFFEAF0E5),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 480),
-                child: child!,
-              ),
-            ),
-          ),
-        );
-      },
-      home: _Shell(controller: controller),
-    ),
+          child: frame!,
+        ),
+      );
+    },
+    home: _Shell(controller: controller),
   );
 }
 
@@ -71,95 +74,105 @@ class _ShellState extends State<_Shell> {
   void weather() => open('Weather', () => WeatherPage(controller: c));
   void profile() => open('Plant profile', () => ProfileForm(controller: c));
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      backgroundColor: cream,
-      scrolledUnderElevation: 0,
-      titleSpacing: 22,
-      title: const Row(
-        children: [
-          Icon(Icons.spa_rounded, color: leaf),
-          SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              'plant heart',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 19,
-                letterSpacing: -.5,
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: c,
+    builder: (context, _) => Scaffold(
+      appBar: AppBar(
+        backgroundColor: cream,
+        scrolledUnderElevation: 0,
+        titleSpacing: 22,
+        title: const Row(
+          children: [
+            Icon(Icons.spa_rounded, color: leaf),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'plant heart',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 19,
+                  letterSpacing: -.5,
+                ),
               ),
             ),
-          ),
+          ],
+        ),
+        actions: [
+          if (c.data.onboarded)
+            Padding(
+              padding: const EdgeInsets.only(right: 14),
+              child: Tag('${c.data.checkInDays.length} care days'),
+            ),
         ],
       ),
-      actions: [
-        if (c.data.onboarded)
-          Padding(
-            padding: const EdgeInsets.only(right: 14),
-            child: Tag('${c.data.checkInDays.length} care days'),
-          ),
-      ],
-    ),
-    body: SafeArea(
-      child: Column(
-        children: [
-          if (c.notice != null) _notice(c.notice!, c.dismissNotice, 'Dismiss'),
-          if (c.storageError != null)
-            _notice(c.storageError!, c.retrySave, 'Retry save'),
-          Expanded(
-            child: !c.data.onboarded
-                ? ProfileForm(controller: c, onboarding: true)
-                : switch (selected) {
-                    0 => HomePage(
-                      controller: c,
-                      select: (i) => setState(() => selected = i),
-                      openCare: care,
-                      openWeather: weather,
-                    ),
-                    1 => LabPage(controller: c),
-                    2 => ChatPage(controller: c),
-                    3 => GardenPage(controller: c),
-                    _ => _more(),
-                  },
-          ),
-        ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            if (c.notice != null)
+              _notice(c.notice!, c.dismissNotice, 'Dismiss'),
+            if (c.storageError != null)
+              _notice(c.storageError!, c.retrySave, 'Retry save'),
+            Expanded(
+              child: Semantics(
+                key: const ValueKey('main-content'),
+                container: true,
+                explicitChildNodes: true,
+                child: !c.data.onboarded
+                    ? ProfileForm(controller: c, onboarding: true)
+                    : switch (selected) {
+                        0 => HomePage(
+                          controller: c,
+                          select: (i) => setState(() => selected = i),
+                          openCare: care,
+                          openWeather: weather,
+                        ),
+                        1 => LabPage(controller: c),
+                        2 => ChatPage(controller: c),
+                        3 => GardenPage(controller: c),
+                        _ => _more(),
+                      },
+              ),
+            ),
+          ],
+        ),
       ),
+      bottomNavigationBar: c.data.onboarded
+          ? NavigationBar(
+              selectedIndex: selected,
+              onDestinationSelected: (index) =>
+                  setState(() => selected = index),
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.home_outlined),
+                  selectedIcon: Icon(Icons.home_rounded),
+                  label: 'Home',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.science_outlined),
+                  selectedIcon: Icon(Icons.science_rounded),
+                  label: 'Lab',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.chat_bubble_outline_rounded),
+                  selectedIcon: Icon(Icons.chat_bubble_rounded),
+                  label: 'Chat',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.yard_outlined),
+                  selectedIcon: Icon(Icons.yard_rounded),
+                  label: 'Garden',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.grid_view_outlined),
+                  selectedIcon: Icon(Icons.grid_view_rounded),
+                  label: 'More',
+                ),
+              ],
+            )
+          : null,
     ),
-    bottomNavigationBar: c.data.onboarded
-        ? NavigationBar(
-            selectedIndex: selected,
-            onDestinationSelected: (index) => setState(() => selected = index),
-            destinations: const [
-              NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home_rounded),
-                label: 'Home',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.science_outlined),
-                selectedIcon: Icon(Icons.science_rounded),
-                label: 'Lab',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.chat_bubble_outline_rounded),
-                selectedIcon: Icon(Icons.chat_bubble_rounded),
-                label: 'Chat',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.yard_outlined),
-                selectedIcon: Icon(Icons.yard_rounded),
-                label: 'Garden',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.grid_view_outlined),
-                selectedIcon: Icon(Icons.grid_view_rounded),
-                label: 'More',
-              ),
-            ],
-          )
-        : null,
   );
   Widget _notice(String text, VoidCallback action, String label) => Container(
     color: sun,

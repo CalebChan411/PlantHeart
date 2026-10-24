@@ -52,6 +52,8 @@ class _MiloState extends State<Milo> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) => Semantics(
+    container: true,
+    excludeSemantics: true,
     label:
         '${widget.name}, a smiling potted plant. Simulated mood: ${widget.mood}.',
     image: true,

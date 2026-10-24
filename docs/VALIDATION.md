@@ -55,7 +55,9 @@ the separate browser reload check exercises real browser local storage.
 
 ## Remaining limits
 
-There are no known unresolved analyzer, test or web-build failures. Native Windows
+There are no known unresolved analyzer, test or web-build failures. A subsequent
+user report identified repeated Windows accessibility-bridge AXTree errors; see
+the follow-up below. Native Windows
 build/run, clipboard behavior on Windows, real screen-reader acceptance and manual
 Windows UX still require a Windows host. The official Windows runner was generated,
 its title/starting size adjusted, and plugin files resolved; that does not establish
@@ -72,3 +74,26 @@ Draft persistence does not publish an environment or validate restoration in a n
 task. Review and save the changes in environment settings, then publish the
 environment to make this setup reusable. Repository source is versioned separately in Git. Environment publication does
 not itself commit or push source to GitHub, deploy the app or publish a website.
+
+
+## Windows accessibility follow-up
+
+The user successfully launched the app on Windows, then reported repeated
+`accessibility_bridge.cc(114)` errors stating that nodes would not be in the AX
+tree and were not the new root, across interactions (not just Lab).
+The Linux tests do not execute Windows' native AXTree bridge.
+
+The follow-up reduces app-wide semantics churn: MaterialApp/navigation are no
+longer rebuilt on every data notification, successful saves do not notify again
+unless clearing a storage error, the main content has an explicit stable semantics
+container, and the animated character has its own semantics boundary. Slider
+increase/decrease announcements now format the proposed value rather than always
+announcing the current value. Accessibility is retained.
+
+Validation: **20 tests passed** (13 controller/service, 7 widget); analyzer clean.
+The added regression test enables semantics, repeats all tab transitions and
+sensor presets, verifies a stable content boundary and checks actual slider
+values and distinct increase/decrease announcements. These checks do not prove
+the native Windows error is resolved. This change is a mitigation pending Windows
+retest, not a confirmed diagnosis or engine fix. No Flutter SDK patch or downgrade
+was applied. Capture the first error from a cold start if the problem persists.

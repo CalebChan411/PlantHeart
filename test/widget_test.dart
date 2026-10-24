@@ -219,4 +219,37 @@ void main() {
       }
     },
   );
+  testWidgets(
+    'semantic content boundary stays stable across navigation and saved updates',
+    (tester) async {
+      final semantics = tester.ensureSemantics();
+      try {
+        await start(tester);
+        final boundary = find.byKey(const ValueKey('main-content'));
+        final id = tester.getSemantics(boundary).id;
+        for (var pass = 0; pass < 3; pass++) {
+          for (final tab in ['Lab', 'Chat', 'Garden', 'More', 'Home']) {
+            await nav(tester, tab);
+            expect(tester.getSemantics(boundary).id, id);
+            if (tab == 'Lab') {
+              await tester.tap(find.text('Dry Soil'));
+              await settle(tester);
+              final moisture = find.semantics.byValue('Soil moisture 12%');
+              expect(moisture.evaluate(), hasLength(1));
+              final data = moisture.evaluate().single.getSemanticsData();
+              expect(data.increasedValue, isNot(data.value));
+              expect(data.decreasedValue, isNot(data.value));
+              expect(tester.getSemantics(boundary).id, id);
+              await tester.tap(find.text('Healthy Conditions'));
+              await settle(tester);
+              expect(tester.getSemantics(boundary).id, id);
+            }
+            expect(tester.takeException(), isNull);
+          }
+        }
+      } finally {
+        semantics.dispose();
+      }
+    },
+  );
 }

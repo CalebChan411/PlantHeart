@@ -166,7 +166,13 @@ class LabPage extends StatelessWidget {
         ],
       ),
       Slider(
-        semanticFormatterCallback: (_) => '$label $value',
+        semanticFormatterCallback: (next) =>
+            '$label ${switch (label) {
+              'Soil pH' => next.toStringAsFixed(1),
+              'Light intensity' => '${next.round()} lux',
+              'Temperature' => '${next.toStringAsFixed(1)}°C',
+              _ => '${next.round()}%',
+            }}',
         value: current,
         min: min,
         max: max,

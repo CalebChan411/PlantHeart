@@ -100,3 +100,10 @@ weather, cloud profiles, authenticated family sharing, encryption, LLM/RAG/vecto
 memory, voice/TTS, camera/photos, time-lapse/memorial video and native mobile builds.
 Photo checkpoints currently use honest text milestones. Windows native execution
 must still be verified on Windows; it cannot run on this Linux cloud host.
+
+
+Windows follow-up: a user confirmed native launch, but reported repeated Flutter
+AXTree accessibility errors during interaction. The latest change reduces global
+semantics rebuilds and passes 20 tests; Windows confirmation is still pending.
+See the follow-up in `docs/VALIDATION.md`. Do not treat Linux/widget success as
+proof of native Windows accessibility correctness.

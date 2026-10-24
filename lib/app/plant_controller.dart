@@ -43,8 +43,10 @@ class PlantController extends ChangeNotifier {
     final operation = (_pending ?? Future<void>.value()).then((_) async {
       try {
         await repository.save(document);
-        storageError = null;
-        notifyListeners();
+        if (storageError != null) {
+          storageError = null;
+          notifyListeners();
+        }
         return true;
       } catch (_) {
         storageError =
