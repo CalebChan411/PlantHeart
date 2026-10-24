@@ -1,0 +1,11 @@
+.dart_tool/
+.flutter-plugins*
+.packages
+build/
+coverage/
+*.iml
+.idea/
+.vscode/
+windows/flutter/ephemeral/
+linux/flutter/ephemeral/
+.DS_Store

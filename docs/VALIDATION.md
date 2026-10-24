@@ -1,0 +1,74 @@
+# Validation and delivery evidence
+
+Validation performed on the Linux cloud host with **Flutter 3.47.8**, framework
+`737ba8f885dc774b53b442759999a312c9461e4e`, **Dart 3.13.7**, and Chromium 154.
+The initial repository was empty; this is a new local implementation, not a
+verified upgrade of an older unavailable application.
+
+| Check | Actual result |
+| --- | --- |
+| SDK installation and repeatable setup script | Passed; official pinned Git source and standard engine downloads; workspace-local caches |
+| `flutter pub get --enforce-lockfile` | Passed; included lockfile resolves without changes |
+| `flutter analyze` | Passed; no issues |
+| `flutter test --reporter expanded` | **19 passed**, 0 failures, 0 skipped (13 controller/service tests, 6 widget tests) |
+| `flutter build web --release --no-web-resources-cdn` | Passed; release output in `build/web`, local renderer assets; Wasm compatibility dry run also succeeded |
+| Local HTTP HTML and `main.dart.js` | Passed; main script HTTP 200, 2,717,090 bytes |
+| Chromium functional smoke | Passed; onboarding, dry-soil preset, chat explicit memory, Garden display, reload retaining memory and Thirsty mood |
+| Browser runtime/network observation | 0 JavaScript page errors and 0 external network requests in the local smoke workflow |
+| Visual inspection | Original onboarding, Home and Garden inspected at desktop and narrow widths; screenshots in `docs/screenshots` |
+| `flutter run -d windows` | Attempted; unavailable: “No supported devices found with name or id matching 'windows'” on Linux |
+| Native Windows compilation and plugin runtime | **Not executed**; requires Windows and Visual Studio C++ workload |
+| `git diff --check` | Passed; checkout originally had no tracked files, so this alone does not validate newly created source |
+| Reusable environment draft | `install_script`, `start_skill` and `storage.googleapis.com` custom network entry saved; no secrets required |
+
+The web build emits an informational font-subset notice for Flutter's unused
+Cupertino fallback font. All app icons use bundled Material Icons; the build exits
+successfully. Newer dependency notices were not used to upgrade the locked graph.
+Wasm compatibility output is not a claim of an executed Wasm build.
+
+## Test coverage
+
+Controller/service tests exercise dry/healthy and species-specific care, mood
+propagation into chat, explicit memory capture/recall/edit/delete, distress and
+unknown messages, weather preview versus apply, emotion score bounds and elapsed
+time, distinct-date/idempotent check-ins and challenge completion, full JSON
+round-trip (all modules/preferences), lifecycle and milestone CRUD, scoped clearing
+and reset, corrupt-data recovery backups, constrained/non-finite sensors, ordered
+concurrent saves and failed-save recovery.
+
+Widget tests exercise first run and a simulated restarted controller, all five
+destinations, all five detail modules and back navigation, keyboard chat submission,
+memories across modules, memory creation/edit and cancelled/confirmed deletion,
+weather apply, larger-text preference, clearing and cancelled/confirmed full reset,
+and narrow layouts at 360×740 with larger text. These tests use mocked preferences;
+the separate browser reload check exercises real browser local storage.
+
+## Corrections made during validation
+
+- Prevented an empty “Remember that” request from saving the word “that”.
+- Made the header title flexible on narrow layouts.
+- Added Material surfaces inside cards so interactive ListTiles show their ink
+  feedback and pass Flutter 3.47's runtime assertions.
+- Moved asynchronous save feedback behind mounted checks.
+- Initialized the save queue lazily; widget tests drain writes within their test
+  zone rather than awaiting zone-bound futures from an external teardown.
+
+## Remaining limits
+
+There are no known unresolved analyzer, test or web-build failures. Native Windows
+build/run, clipboard behavior on Windows, real screen-reader acceptance and manual
+Windows UX still require a Windows host. The official Windows runner was generated,
+its title/starting size adjusted, and plugin files resolved; that does not establish
+native build success. Mobile native targets are not included.
+
+The prototype is not an encrypted database, medical service, scientific emotion
+model, hardware integration or cloud product. Camera/photos, voice, videos, live
+weather, LLM/RAG, family accounts, OS notifications and real social sharing remain
+future work. Latest-memory recall is simple lookup. Calendar-based rewards trust
+the device clock. No separate visual references were attached; visual checks use
+the written brief. See `TRACEABILITY.md` for proposal scope.
+
+Draft persistence does not publish an environment or validate restoration in a new
+task. Review and save the changes in environment settings, then publish the
+environment to make this setup reusable. Repository source is versioned separately in Git. Environment publication does
+not itself commit or push source to GitHub, deploy the app or publish a website.
