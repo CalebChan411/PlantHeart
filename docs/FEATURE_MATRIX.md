@@ -7,15 +7,15 @@ feature matrix existed in the empty checkout.
 | Area | Delivered behavior | Evidence / boundary |
 | --- | --- | --- |
 | Onboarding | Saved name/species/personality, defaults and later editing | Widget first-run/reload; controller profile persistence |
-| Mobile layout/navigation | Centered max 480px, five destinations, scrollable tools | All destinations/detail routes; narrow larger-text widget test; Chromium screenshots |
+| Mobile layout/navigation | Centered max 480px; Home, Community, Memoir, Care, More; separate test popups | All destinations/detail routes; narrow larger-text widget test; Chromium screenshots |
 | Companion | Original painted leaves/pot/face, sway, thirsty and sleepy expressions, reduce motion | Reactive sensor widget test and visual inspection; fictional moods |
-| Sensors | All five sliders, constrained values, four presets, 100 snapshots, latest 10 expanded readings | Range, preset, snapshot and reload tests; no hardware |
+| Sensors | More sensor popup: five sliders, constrained values, four presets, 100 snapshots, latest 10 expanded readings | Range, preset, snapshot and reload tests; no hardware |
 | Emotion | Comfort/vitality/attachment/loneliness and explainable deterministic moods | Bounds/time/propagation tests; simulator metrics only |
-| Care | Species ranges, priority, values, reasons/actions, Home/More access | Species and dry/healthy/weather tests; illustrative thresholds |
-| Chat | Persistent conversation, profile/tone/sensor context, prompts and keyboard send | Agent unit tests and keyboard-send widget test; no LLM |
-| Memory | Explicit capture, latest-entry recall, CRUD, confirmed deletion and timestamps | Unit/widget CRUD and restart tests; no vectors/semantic retrieval |
+| Care | Species ranges, priority, values, reasons/actions, Home/Care access | Species and dry/healthy/weather tests; illustrative thresholds |
+| Conversation testing | More popup with persistent replies, profile/tone/sensor context, prompts, typed simulated voice input and reply animation | Agent/controller/widget and browser checks; no LLM, microphone, audio or speech synchronization |
+| Memoir / memory | Explicit capture, latest-entry recall, CRUD, confirmed deletion and timestamps | Unit/widget CRUD and restart tests; no vectors/semantic retrieval |
 | Growth | Milestone CRUD, lifecycle transitions, care-event timeline, copyable text | Controller lifecycle/CRUD/reload tests; text photos only |
-| Weather | Four scenarios, three simulated locations, preview/apply, downstream update | Preview/apply controller test; no API or location permission |
+| Weather | More weather popup: four scenarios, three simulated locations, preview/apply, downstream update | Preview/apply controller test; no API or location permission |
 | Community | Sample/user posts, like toggle, virtual visit, joined/earned care challenge | Interactions/reload/idempotent distinct-day tests; all local |
 | Library | Pothos, Snake Plant, Spider Plant, selection and heuristic suitability | Species care/reload tests; demo data, not a verified plant database |
 | Settings | Profile, larger text, reduce motion, check-in/sharing preferences, data summary | Settings round-trip; narrow text tests; clipboard depends on platform |
@@ -23,6 +23,7 @@ feature matrix existed in the empty checkout.
 | Persistence/recovery | One ordered document, original-data recovery backups, save retry | Full round-trip, concurrent writes, corrupt-data and failed-write tests |
 | Windows | Official runner, plugin registration, launch/build scripts | Generated and reviewed; compile/run still requires Windows |
 | Web validation target | Local renderer assets and native browser storage | Release build and Chromium functional/reload smoke test |
-| Pixel display preview | Eight pixel expressions; manual/follow/tour modes, monochrome, reference sheet, separate viewer window | Flutter UI and loopback transport tests; physical-screen integration and native Windows launch still unverified |
+| Pixel display preview | Eight feature-only 32×24 white-on-black expressions; manual/follow/tour modes, reply mouth animation, reference sheet, separate viewer window | Flutter UI and loopback transport tests; physical-screen integration and native Windows launch still unverified |
 | Home sensor status bars | Five compact rows visible with the plant; three-band ring pointers and tappable five-zone/range details | Derived from active species; non-linear care-zone scale, no new sensor state |
 | Plant collection | Add named plants; animated wrapping arrow selection; independent data and saved active selection; distinct species foliage | Isolation, full reload, legacy migration/backup, reset and accessibility layout tests; no family accounts or hardware pairing |
+| Product build visibility | `PLANT_HEART_TEST_TOOLS=false` hides all More test entries; product destinations, library and settings remain | Widget check with the define disabled; visibility is not hardware integration |

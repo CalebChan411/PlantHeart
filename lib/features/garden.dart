@@ -34,9 +34,9 @@ class _GardenPageState extends State<GardenPage> {
     final entries = (memory ? d.memories : d.milestones).toList()
       ..sort((a, b) => b.at.compareTo(a.at));
     return PageBody(
-      title: 'Our little garden.',
+      title: 'Our memoir.',
       subtitle: 'Save the moments. Watch your story take root.',
-      eyebrow: 'GOOD THINGS GROW HERE',
+      eyebrow: 'MEMORIES & GROWTH',
       children: [
         Wrap(
           spacing: 10,
@@ -134,7 +134,7 @@ class _GardenPageState extends State<GardenPage> {
                 const SizedBox(height: 6),
                 Text(
                   memory
-                      ? 'Add a memory here or ask your companion to remember something in Chat.'
+                      ? 'Save a little moment from your life with this plant.'
                       : 'Mark a new leaf, a repotting day, or a quiet moment of care.',
                 ),
               ],

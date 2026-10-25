@@ -8,6 +8,7 @@ import '../features/lab.dart';
 import '../features/profile_form.dart';
 import '../features/settings.dart';
 import '../features/tools.dart';
+import '../features/test_window.dart';
 import '../widgets/design.dart';
 import 'plant_controller.dart';
 
@@ -57,6 +58,11 @@ class _Shell extends StatefulWidget {
   @override
   State<_Shell> createState() => _ShellState();
 }
+
+const testingToolsEnabled = bool.fromEnvironment(
+  'PLANT_HEART_TEST_TOOLS',
+  defaultValue: true,
+);
 
 class _ShellState extends State<_Shell> {
   int selected = 0;
@@ -137,9 +143,9 @@ class _ShellState extends State<_Shell> {
                           openWeather: weather,
                           editProfile: profile,
                         ),
-                        1 => LabPage(controller: c),
-                        2 => ChatPage(controller: c),
-                        3 => GardenPage(controller: c),
+                        1 => CommunityPage(controller: c),
+                        2 => GardenPage(controller: c),
+                        3 => CarePage(controller: c),
                         _ => _more(),
                       },
               ),
@@ -159,19 +165,19 @@ class _ShellState extends State<_Shell> {
                   label: 'Home',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.science_outlined),
-                  selectedIcon: Icon(Icons.science_rounded),
-                  label: 'Lab',
+                  icon: Icon(Icons.people_outline),
+                  selectedIcon: Icon(Icons.people_rounded),
+                  label: 'Community',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.chat_bubble_outline_rounded),
-                  selectedIcon: Icon(Icons.chat_bubble_rounded),
-                  label: 'Chat',
+                  icon: Icon(Icons.auto_stories_outlined),
+                  selectedIcon: Icon(Icons.auto_stories_rounded),
+                  label: 'Memoir',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.yard_outlined),
-                  selectedIcon: Icon(Icons.yard_rounded),
-                  label: 'Garden',
+                  icon: Icon(Icons.favorite_outline),
+                  selectedIcon: Icon(Icons.favorite_rounded),
+                  label: 'Care',
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.grid_view_outlined),
@@ -193,76 +199,93 @@ class _ShellState extends State<_Shell> {
       ],
     ),
   );
+  Widget _tool(
+    IconData icon,
+    String title,
+    String subtitle,
+    VoidCallback action,
+  ) => SoftCard(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    child: ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: CircleAvatar(
+        backgroundColor: mint,
+        child: Icon(icon, color: leaf),
+      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
+      subtitle: Text(subtitle),
+      trailing: const Icon(Icons.chevron_right_rounded),
+      onTap: action,
+    ),
+  );
+  void testWindow(String title, Widget Function() page) => showTestWindow(
+    context,
+    title: title,
+    child: AnimatedBuilder(animation: c, builder: (_, _) => page()),
+  );
   Widget _more() => PageBody(
-    title: 'A little more\nto explore.',
-    subtitle: 'Everything you need for your green companion.',
-    eyebrow: 'YOUR GROWING TOOLKIT',
+    title: 'Your growing\ntoolkit.',
+    subtitle: testingToolsEnabled
+        ? 'Plant profiles, preferences and a separate space for prototype tests.'
+        : 'Plant profiles, preferences and your local data.',
+    eyebrow: 'MORE',
     children: [
-      for (final tool in <(IconData, String, String, VoidCallback)>[
-        (
+      _tool(
+        Icons.menu_book_outlined,
+        'Plant Library',
+        'Profiles for your selected plant',
+        () => open('Plant Library', () => LibraryPage(controller: c)),
+      ),
+      _tool(
+        Icons.settings_outlined,
+        'Settings',
+        'Profile, accessibility and local data',
+        () => open(
+          'Settings',
+          () => SettingsPage(controller: c, editProfile: profile),
+        ),
+      ),
+      if (testingToolsEnabled) ...[
+        const SectionTitle('Prototype testing'),
+        const Text(
+          'These tools simulate future sensor and voice inputs. They are not everyday app destinations. No microphone, hardware or speech service is connected.',
+        ),
+        _tool(
+          Icons.tune_rounded,
+          'Sensor simulator',
+          'Manually adjust readings and save test snapshots',
+          () => testWindow('Sensor simulator', () => LabPage(controller: c)),
+        ),
+        _tool(
+          Icons.mic_none_rounded,
+          'Conversation simulator',
+          'Type in place of future voice input; watch the reply animation',
+          () => testWindow(
+            'Conversation simulator',
+            () => ChatPage(controller: c),
+          ),
+        ),
+        _tool(
+          Icons.wb_sunny_outlined,
+          'Weather simulator',
+          'Apply local weather scenarios to readings',
+          () =>
+              testWindow('Weather simulator', () => WeatherPage(controller: c)),
+        ),
+        _tool(
           Icons.grid_on_rounded,
           'Pixel Display Studio',
-          'Preview expressions in a separate screen window',
-          () => open(
+          'White pixel facial features and a separate display window',
+          () => testWindow(
             'Pixel Display Studio',
             () => ExpressionScreenPage(controller: c),
           ),
         ),
-        (
-          Icons.favorite_outline,
-          'Care Guide',
-          'One clear next step for your plant',
-          care,
-        ),
-        (
-          Icons.wb_sunny_outlined,
-          'Weather',
-          'Try a different kind of day',
-          weather,
-        ),
-        (
-          Icons.people_outline,
-          'Community',
-          'A friendly, local-only neighborhood',
-          () => open('Community', () => CommunityPage(controller: c)),
-        ),
-        (
-          Icons.menu_book_outlined,
-          'Plant Library',
-          'Find your kind of green',
-          () => open('Plant Library', () => LibraryPage(controller: c)),
-        ),
-        (
-          Icons.settings_outlined,
-          'Settings',
-          'Profile, accessibility and your local data',
-          () => open(
-            'Settings',
-            () => SettingsPage(controller: c, editProfile: profile),
-          ),
-        ),
-      ])
-        SoftCard(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: CircleAvatar(
-              backgroundColor: mint,
-              child: Icon(tool.$1, color: leaf),
-            ),
-            title: Text(
-              tool.$2,
-              style: const TextStyle(fontWeight: FontWeight.w800),
-            ),
-            subtitle: Text(tool.$3),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: tool.$4,
-          ),
-        ),
+      ],
       const SoftCard(
         color: sky,
         child: Text(
-          'Made for little moments of care.\nOffline by design. Simulated with honesty.',
+          'Community, Memoir and Care have their own main destinations. Core data stays on this device.',
         ),
       ),
     ],

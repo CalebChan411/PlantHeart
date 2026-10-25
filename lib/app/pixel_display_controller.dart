@@ -10,13 +10,21 @@ enum PreviewMode { follow, manual, tour }
 class PixelDisplayController extends ChangeNotifier {
   final Listenable plant;
   final ExpressionFrame Function() followFrame;
+  final String Function() activePlantId;
   final _host = DisplayHost();
   PreviewMode mode = PreviewMode.follow;
   PixelExpression selected = PixelExpression.happy;
-  bool monochrome = false, pauseMotion = false;
+  bool pauseMotion = false;
   String? syncError;
-  Timer? _tour;
-  PixelDisplayController(this.plant, this.followFrame) {
+  Timer? _tour, _replyTimer;
+  String? _replyPlant;
+  int _replyId = 0, _replyEndsAtMs = 0;
+  InteractionPhase interaction = InteractionPhase.idle;
+  PixelDisplayController(
+    this.plant,
+    this.followFrame, {
+    required this.activePlantId,
+  }) {
     plant.addListener(_changed);
   }
   ExpressionFrame get frame {
@@ -24,7 +32,10 @@ class PixelDisplayController extends ChangeNotifier {
     return ExpressionFrame(
       expression: mode == PreviewMode.follow ? live.expression : selected,
       name: live.name,
-      monochrome: monochrome,
+      monochrome: true,
+      interaction: interaction,
+      replyId: _replyId,
+      replyEndsAtMs: _replyEndsAtMs,
       reducedMotion: pauseMotion || live.reducedMotion,
       source: switch (mode) {
         PreviewMode.follow => 'Following simulated plant',
@@ -44,11 +55,13 @@ class PixelDisplayController extends ChangeNotifier {
   }
 
   void _changed() {
+    if (_replyPlant != null && _replyPlant != activePlantId()) _cancelReply();
     _publish();
     notifyListeners();
   }
 
   void setMode(PreviewMode next) {
+    _cancelReply();
     _tour?.cancel();
     mode = next;
     if (next == PreviewMode.tour) {
@@ -63,14 +76,40 @@ class PixelDisplayController extends ChangeNotifier {
   }
 
   void select(PixelExpression next) {
+    _cancelReply();
     _tour?.cancel();
     mode = PreviewMode.manual;
     selected = next;
     _changed();
   }
 
-  void setMonochrome(bool next) {
-    monochrome = next;
+  void _cancelReply() {
+    _replyTimer?.cancel();
+    interaction = InteractionPhase.idle;
+    _replyPlant = null;
+    _replyEndsAtMs = 0;
+  }
+
+  void stopReply() {
+    _cancelReply();
+    _changed();
+  }
+
+  void playReply(String reply) {
+    _tour?.cancel();
+    _cancelReply();
+    mode = PreviewMode.follow;
+    _replyPlant = activePlantId();
+    _replyId++;
+    final duration = Duration(
+      milliseconds: (1400 + reply.length * 18).clamp(1800, 8000),
+    );
+    _replyEndsAtMs = DateTime.now().add(duration).millisecondsSinceEpoch;
+    interaction = InteractionPhase.replying;
+    _replyTimer = Timer(duration, () {
+      _cancelReply();
+      _changed();
+    });
     _changed();
   }
 
@@ -88,6 +127,7 @@ class PixelDisplayController extends ChangeNotifier {
   void dispose() {
     plant.removeListener(_changed);
     _tour?.cancel();
+    _replyTimer?.cancel();
     unawaited(_host.dispose());
     super.dispose();
   }

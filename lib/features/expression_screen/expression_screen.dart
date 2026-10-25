@@ -48,7 +48,7 @@ class _ExpressionScreenPageState extends State<ExpressionScreenPage> {
       if (!mounted) return;
       setState(
         () => _windowMessage = opened
-            ? 'Window launch requested. You can now return to Lab; Follow plant keeps the screen in sync.'
+            ? 'Window launch requested. Close this tool and open Sensor simulator in More; Follow plant keeps the screen in sync.'
             : 'The browser blocked the window. Allow pop-ups for this app and try again.',
       );
     } catch (_) {
@@ -73,8 +73,8 @@ class _ExpressionScreenPageState extends State<ExpressionScreenPage> {
   Widget build(BuildContext context) {
     final frame = _frame;
     return PageBody(
-      title: 'A face for\nevery little feeling.',
-      subtitle: 'Preview the pixel expressions for a future pot display.',
+      title: 'A little expression.\nOnly pixels.',
+      subtitle: 'Black-and-white facial features for a future pot display.',
       eyebrow: 'PIXEL DISPLAY STUDIO',
       children: [
         const Tag('Software preview · no hardware connected', color: sky),
@@ -100,7 +100,7 @@ class _ExpressionScreenPageState extends State<ExpressionScreenPage> {
                     ),
                   ),
                   const Text(
-                    '32 × 32',
+                    '32 × 24',
                     style: TextStyle(color: Color(0xFFB7C8BC), fontSize: 12),
                   ),
                 ],
@@ -109,7 +109,7 @@ class _ExpressionScreenPageState extends State<ExpressionScreenPage> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: AspectRatio(
-                  aspectRatio: 1,
+                  aspectRatio: 4 / 3,
                   child: PixelFace(frame: frame),
                 ),
               ),
@@ -159,7 +159,7 @@ class _ExpressionScreenPageState extends State<ExpressionScreenPage> {
             color: mint,
             child: Text(
               'Uses the same simulated sensors and interaction state as Home. Priority: too warm, dry soil, low light, missing you, then happy/calm. '
-              'Keep the display window open, then return to Lab or Weather to watch it react. Manual previews do not change plant data.',
+              'Keep the display window open, then use the Sensor or Weather simulator in More to watch it react. Manual previews do not change plant data.',
             ),
           ),
         Wrap(
@@ -190,21 +190,15 @@ class _ExpressionScreenPageState extends State<ExpressionScreenPage> {
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Monochrome display'),
-          subtitle: const Text(
-            'White pixels for a single-color screen preview.',
-          ),
-          value: _display.monochrome,
-          onChanged: _display.setMonochrome,
-        ),
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
           title: const Text('Pause face animation'),
           subtitle: const Text(
             'Stop blinking and small expression accents. Auto preview is a separate mode.',
           ),
           value: _display.pauseMotion,
           onChanged: _display.setPauseMotion,
+        ),
+        const Text(
+          'White pixels on black. Eyes, eyebrows and mouth only; no avatar outline. Conversation replies animate this display automatically. This is not synchronized speech or TTS.',
         ),
         const Text(
           'This is an expression preview, not real plant emotion detection. The future screen resolution, colors, refresh rate and communication protocol still need hardware confirmation. The display keeps running while you navigate. Closing the main app disconnects it.',
@@ -289,21 +283,15 @@ class _DisplayViewerState extends State<_DisplayViewer> {
                   )
                 : PixelFace(frame: _frame!),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              _connected
-                  ? '${_frame!.name} · ${_frame!.expression.title}\n${_frame!.source} · software display'
-                  : 'Controller disconnected · ${_frame == null ? 'no frame received' : 'showing last frame'}\nReopen the display from Pixel Display Studio.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: _connected
-                    ? const Color(0xFFA8C8AB)
-                    : const Color(0xFFFFD483),
-                fontSize: 13,
+          if (!_connected)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Controller disconnected · ${_frame == null ? 'no frame received' : 'showing last frame'}\nReopen the display from Pixel Display Studio.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white, fontSize: 13),
               ),
             ),
-          ),
         ],
       ),
     ),
@@ -323,7 +311,7 @@ class ExpressionSheet extends StatelessWidget {
       child: PageBody(
         title: 'Small pixels.\nLots of personality.',
         subtitle: 'Eight preview scenarios for a future plant-pot display.',
-        eyebrow: '32 × 32 · PIXEL EXPRESSION STUDY',
+        eyebrow: '32 × 24 · PIXEL EXPRESSION STUDY',
         children: [
           LayoutBuilder(
             builder: (context, constraints) => Wrap(

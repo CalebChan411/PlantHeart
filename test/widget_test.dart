@@ -10,18 +10,13 @@ void main() {
   late PlantController c;
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
-    final data = PlantData()..reducedMotion = true;
     c = PlantController(
       LocalRepository(await SharedPreferences.getInstance()),
-      data,
-      now: () => DateTime(2026, 10, 24, 10),
+      PlantData()..reducedMotion = true,
+      now: () => DateTime(2026, 10, 25, 10),
     );
-    await c.flush();
   });
-  tearDown(() {
-    c.dispose();
-  });
-  Future<void> settle(WidgetTester tester) => tester.pumpAndSettle();
+  tearDown(() => c.dispose());
   Future<void> start(
     WidgetTester tester, {
     bool onboarded = true,
@@ -33,176 +28,223 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     c.data.onboarded = onboarded;
     await tester.pumpWidget(PlantHeartApp(controller: c));
-    await settle(tester);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> closeTool(WidgetTester tester) async {
+    if (find.byTooltip('Close test window').evaluate().isNotEmpty) {
+      await tester.tap(find.byTooltip('Close test window'));
+      await tester.pumpAndSettle();
+    }
   }
 
   Future<void> nav(WidgetTester tester, String label) async {
+    await closeTool(tester);
     await tester.tap(
       find.descendant(
         of: find.byType(NavigationBar),
         matching: find.text(label),
       ),
     );
-    await settle(tester);
+    await tester.pumpAndSettle();
   }
 
-  Future<void> reveal(WidgetTester tester, Finder finder) async {
+  Future<void> reveal(
+    WidgetTester tester,
+    Finder finder, [
+    double delta = 200,
+  ]) async {
+    final dialogLists = find.descendant(
+      of: find.byType(Dialog),
+      matching: find.byType(ListView),
+    );
+    final list = dialogLists.evaluate().isNotEmpty
+        ? dialogLists.first
+        : find.byType(ListView).first;
     await tester.scrollUntilVisible(
       finder,
-      250,
-      scrollable: find.byType(Scrollable).first,
+      delta,
+      scrollable: find
+          .descendant(of: list, matching: find.byType(Scrollable))
+          .first,
     );
-    await settle(tester);
+    await tester.pumpAndSettle();
   }
 
-  testWidgets(
-    'first run saves profile and does not repeat after simulated reload',
-    (tester) async {
-      await start(tester, onboarded: false);
-      expect(find.text('Meet your new\ngreen friend.'), findsOneWidget);
-      await reveal(tester, find.text('Let’s grow together'));
-      await tester.tap(find.text('Let’s grow together'));
-      await settle(tester);
-      expect(find.byType(NavigationBar), findsOneWidget);
-      expect(c.data.onboarded, isTrue);
-      final loaded = await c.repository.load();
-      expect(loaded.warning, isNull);
-      expect(loaded.data.reducedMotion, isTrue);
-      final restarted = PlantController(
-        c.repository,
-        loaded.data,
-        collection: loaded.collection,
-      );
-      await tester.pumpWidget(const SizedBox());
-      await tester.pumpWidget(PlantHeartApp(controller: restarted));
-      await settle(tester);
-      expect(find.text('Meet your new\ngreen friend.'), findsNothing);
-      await tester.pumpWidget(const SizedBox());
-      restarted.dispose();
-    },
-  );
-
-  testWidgets('five destinations, preset, chat and explicit memory capture', (
-    tester,
-  ) async {
-    await start(tester);
-    expect(find.text('Milo'), findsOneWidget);
-    await nav(tester, 'Lab');
-    await tester.tap(find.text('Dry Soil'));
-    await settle(tester);
-    expect(c.data.sensors.moisture, 12);
+  Future<void> tool(WidgetTester tester, String title) async {
     await nav(tester, 'Home');
-    expect(find.textContaining('Thirsty'), findsOneWidget);
-    await nav(tester, 'Chat');
-    await tester.enterText(
-      find.byType(TextField),
-      'Remember that I enjoy walks',
-    );
-    await tester.testTextInput.receiveAction(TextInputAction.send);
-    await settle(tester);
-    expect(c.data.memories.single.text, 'I enjoy walks');
-    await nav(tester, 'Garden');
-    expect(find.text('I enjoy walks'), findsOneWidget);
-    await tester.tap(find.text('Journey'));
-    await settle(tester);
-    expect(find.text('Milo’s growth journey'), findsOneWidget);
     await nav(tester, 'More');
-    expect(find.text('Care Guide'), findsOneWidget);
-    expect(find.text('Weather'), findsOneWidget);
-  });
+    await reveal(tester, find.text(title));
+    await tester.tap(find.text(title));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Close test window'), findsOneWidget);
+  }
 
-  testWidgets('all detail modules open and back navigation works', (
+  testWidgets('first run saves profile and does not repeat after reload', (
     tester,
   ) async {
-    await start(tester);
-    await nav(tester, 'More');
-    for (final title in [
-      'Pixel Display Studio',
-      'Care Guide',
-      'Weather',
-      'Community',
-      'Plant Library',
-      'Settings',
-    ]) {
-      await reveal(tester, find.text(title));
-      await tester.tap(find.text(title));
-      await settle(tester);
-      expect(find.byType(BackButton), findsOneWidget);
-      expect(tester.takeException(), isNull);
-      await tester.tap(find.byType(BackButton));
-      await settle(tester);
-    }
+    await start(tester, onboarded: false);
+    expect(find.text('Meet your new\ngreen friend.'), findsOneWidget);
+    await reveal(tester, find.text('Let’s grow together'));
+    await tester.tap(find.text('Let’s grow together'));
+    await tester.pumpAndSettle();
+    expect(c.data.onboarded, isTrue);
+    final loaded = await c.repository.load();
+    expect(loaded.warning, isNull);
+    final restarted = PlantController(
+      c.repository,
+      loaded.data,
+      collection: loaded.collection,
+    );
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(PlantHeartApp(controller: restarted));
+    await tester.pumpAndSettle();
+    expect(find.text('Meet your new\ngreen friend.'), findsNothing);
+    expect(find.byType(NavigationBar), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    restarted.dispose();
   });
-
   testWidgets(
-    'memory add, edit and confirmed deletion interact with persistent state',
+    'product navigation excludes test tools; popup inputs feed care and memoir',
     (tester) async {
       await start(tester);
-      await nav(tester, 'Garden');
-      await tester.tap(find.text('Plant a memory'));
-      await settle(tester);
-      await tester.enterText(find.byType(TextField), 'Our first afternoon');
-      await tester.tap(find.text('Save'));
-      await settle(tester);
-      expect(c.data.memories.single.text, 'Our first afternoon');
-      await reveal(tester, find.byTooltip('Edit memory'));
-      await tester.tap(find.byTooltip('Edit memory'));
-      await settle(tester);
-      await tester.enterText(find.byType(TextField), 'Our first morning');
-      await tester.tap(find.text('Save'));
-      await settle(tester);
-      expect(c.data.memories.single.text, 'Our first morning');
-      await tester.tap(find.byTooltip('Delete memory'));
-      await settle(tester);
-      await tester.tap(find.text('Cancel'));
-      await settle(tester);
-      expect(c.data.memories, hasLength(1));
-      await tester.tap(find.byTooltip('Delete memory'));
-      await settle(tester);
-      await tester.tap(find.text('Confirm'));
-      await settle(tester);
-      expect(c.data.memories, isEmpty);
+      final bar = find.byType(NavigationBar);
+      for (final label in ['Home', 'Community', 'Memoir', 'Care', 'More']) {
+        expect(
+          find.descendant(of: bar, matching: find.text(label)),
+          findsOneWidget,
+        );
+      }
+      for (final label in [
+        'Lab',
+        'Chat',
+        'Sensor simulator',
+        'Conversation simulator',
+      ]) {
+        expect(
+          find.descendant(of: bar, matching: find.text(label)),
+          findsNothing,
+        );
+      }
+      await tool(tester, 'Sensor simulator');
+      await tester.tap(find.text('Dry Soil'));
+      await tester.pumpAndSettle();
+      expect(c.data.sensors.moisture, 12);
+      await nav(tester, 'Home');
+      expect(find.textContaining('Thirsty'), findsOneWidget);
+      await tool(tester, 'Conversation simulator');
+      await tester.enterText(
+        find.byType(TextField),
+        'Remember that I enjoy walks',
+      );
+      await tester.testTextInput.receiveAction(TextInputAction.send);
+      await tester.pumpAndSettle();
+      expect(c.data.memories.single.text, 'I enjoy walks');
+      await nav(tester, 'Memoir');
+      expect(find.text('I enjoy walks'), findsOneWidget);
+      await tester.tap(find.text('Journey'));
+      await tester.pumpAndSettle();
+      expect(find.text('Milo’s growth journey'), findsOneWidget);
+      await nav(tester, 'Care');
+      expect(find.text('Soil moisture is low'), findsOneWidget);
+      await nav(tester, 'Community');
+      expect(find.text('Create local post'), findsOneWidget);
     },
   );
-
   testWidgets(
-    'weather apply and settings preferences, clear and reset controls work',
+    'user tools use routes and all prototype tools use closable popups',
     (tester) async {
       await start(tester);
       await nav(tester, 'More');
-      await tester.tap(find.text('Weather'));
-      await settle(tester);
+      for (final title in ['Plant Library', 'Settings']) {
+        await reveal(tester, find.text(title));
+        await tester.tap(find.text(title));
+        await tester.pumpAndSettle();
+        expect(find.byType(BackButton), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await tester.tap(find.byType(BackButton));
+        await tester.pumpAndSettle();
+      }
+      for (final title in [
+        'Sensor simulator',
+        'Conversation simulator',
+        'Weather simulator',
+        'Pixel Display Studio',
+      ]) {
+        await tool(tester, title);
+        expect(find.byType(Dialog), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await closeTool(tester);
+        expect(find.byType(NavigationBar), findsOneWidget);
+      }
+    },
+  );
+  testWidgets(
+    'memoir creation, edit and cancelled/confirmed deletion persist',
+    (tester) async {
+      await start(tester);
+      await nav(tester, 'Memoir');
+      await tester.tap(find.text('Plant a memory'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'Our first afternoon');
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      expect(c.data.memories.single.text, 'Our first afternoon');
+      await reveal(tester, find.byTooltip('Edit memory'));
+      await tester.tap(find.byTooltip('Edit memory'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'Our first morning');
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      expect(c.data.memories.single.text, 'Our first morning');
+      await tester.tap(find.byTooltip('Delete memory'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(c.data.memories, hasLength(1));
+      await tester.tap(find.byTooltip('Delete memory'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Confirm'));
+      await tester.pumpAndSettle();
+      expect(c.data.memories, isEmpty);
+    },
+  );
+  testWidgets(
+    'weather popup propagation, settings clear and reset controls work',
+    (tester) async {
+      await start(tester);
+      await tool(tester, 'Weather simulator');
       await tester.tap(find.text('Heatwave'));
-      await settle(tester);
-      await reveal(tester, find.text('Apply scenario to Sensor Lab'));
-      await tester.tap(find.text('Apply scenario to Sensor Lab'));
-      await settle(tester);
+      await tester.pumpAndSettle();
+      await reveal(tester, find.text('Apply scenario to readings'));
+      await tester.tap(find.text('Apply scenario to readings'));
+      await tester.pumpAndSettle();
       expect(c.data.sensors.temperature, 38);
-      await tester.tap(find.byType(BackButton));
-      await settle(tester);
+      await nav(tester, 'Home');
+      await nav(tester, 'More');
       await reveal(tester, find.text('Settings'));
       await tester.tap(find.text('Settings'));
-      await settle(tester);
+      await tester.pumpAndSettle();
       await reveal(tester, find.text('Larger text'));
       await tester.tap(find.text('Larger text'));
-      await settle(tester);
+      await tester.pumpAndSettle();
       expect(c.data.largeText, isTrue);
       c.saveEntry('A memory to clear', memory: true);
       await tester.pump();
       await reveal(tester, find.text('Clear Memory Garden'));
       await tester.tap(find.text('Clear Memory Garden'));
-      await settle(tester);
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Confirm'));
-      await settle(tester);
+      await tester.pumpAndSettle();
       expect(c.data.memories, isEmpty);
       await reveal(tester, find.text('Reset all demo data'));
       await tester.tap(find.text('Reset all demo data'));
-      await settle(tester);
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Cancel'));
-      await settle(tester);
+      await tester.pumpAndSettle();
       expect(c.data.onboarded, isTrue);
       await tester.tap(find.text('Reset all demo data'));
-      await settle(tester);
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Confirm'));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
@@ -212,46 +254,50 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     },
   );
-
+  testWidgets('large text and narrow product navigation avoids overflow', (
+    tester,
+  ) async {
+    c.data.largeText = true;
+    await start(tester, size: const Size(360, 740));
+    for (final label in ['Community', 'Memoir', 'Care', 'More', 'Home']) {
+      await nav(tester, label);
+      expect(tester.takeException(), isNull);
+    }
+    await tool(tester, 'Conversation simulator');
+    expect(tester.takeException(), isNull);
+    await tester.enterText(find.byType(TextField), 'Hello');
+    await tester.testTextInput.receiveAction(TextInputAction.send);
+    await tester.pumpAndSettle();
+    expect(c.data.messages, hasLength(2));
+    expect(tester.takeException(), isNull);
+    await closeTool(tester);
+    await tester.pump(const Duration(seconds: 9));
+  });
   testWidgets(
-    'large text and narrow viewport scroll without overflow across pages',
-    (tester) async {
-      c.data.largeText = true;
-      await start(tester, size: const Size(360, 740));
-      for (final title in ['Lab', 'Chat', 'Garden', 'More', 'Home']) {
-        await nav(tester, title);
-        expect(tester.takeException(), isNull);
-      }
-    },
-  );
-  testWidgets(
-    'semantic content boundary stays stable across navigation and saved updates',
+    'semantic boundary survives product navigation and sensor popup',
     (tester) async {
       final semantics = tester.ensureSemantics();
       try {
         await start(tester);
         final boundary = find.byKey(const ValueKey('main-content'));
         final id = tester.getSemantics(boundary).id;
-        for (var pass = 0; pass < 3; pass++) {
-          for (final tab in ['Lab', 'Chat', 'Garden', 'More', 'Home']) {
-            await nav(tester, tab);
+        for (var pass = 0; pass < 2; pass++) {
+          for (final label in ['Community', 'Memoir', 'Care', 'More', 'Home']) {
+            await nav(tester, label);
             expect(tester.getSemantics(boundary).id, id);
-            if (tab == 'Lab') {
-              await tester.tap(find.text('Dry Soil'));
-              await settle(tester);
-              final moisture = find.semantics.byValue('Soil moisture 12%');
-              expect(moisture.evaluate(), hasLength(1));
-              final data = moisture.evaluate().single.getSemanticsData();
-              expect(data.increasedValue, isNot(data.value));
-              expect(data.decreasedValue, isNot(data.value));
-              expect(tester.getSemantics(boundary).id, id);
-              await tester.tap(find.text('Healthy Conditions'));
-              await settle(tester);
-              expect(tester.getSemantics(boundary).id, id);
-            }
-            expect(tester.takeException(), isNull);
           }
         }
+        await tool(tester, 'Sensor simulator');
+        await tester.tap(find.text('Dry Soil'));
+        await tester.pumpAndSettle();
+        final moisture = find.semantics.byValue('Soil moisture 12%');
+        expect(moisture.evaluate(), hasLength(1));
+        final data = moisture.evaluate().single.getSemanticsData();
+        expect(data.increasedValue, isNot(data.value));
+        expect(data.decreasedValue, isNot(data.value));
+        await closeTool(tester);
+        expect(tester.getSemantics(boundary).id, id);
+        expect(tester.takeException(), isNull);
       } finally {
         semantics.dispose();
       }

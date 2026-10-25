@@ -2,7 +2,9 @@
 
 `main.dart` opens local storage with a retryable error screen. `app/app.dart`
 contains theme application, a centered 480px maximum-width navigation shell and
-detail routes. `features/` holds focused screens. `widgets/` holds reusable cards,
+detail routes and closable More testing dialogs. The main destinations are Home,
+Community, Memoir, Care and More; test entry points can be hidden at build time.
+`features/` holds focused screens. `widgets/` holds reusable cards,
 forms and the original animated `CustomPainter` character.
 
 `PlantController` is the single shared `ChangeNotifier`. `PlantData` holds the
@@ -74,3 +76,16 @@ PlantData to the existing services/screens. Each record keeps its original data
 format, and all record edits and selection changes share the ordered write queue.
 The former single-plant document is accepted and preserved before migration.
 Read `PLANT_COLLECTION.md` for schema, backup, preference scope and Home layout.
+
+## Software display and reply animation
+
+`PixelDisplayController` owns a temporary display session, independent of plant
+record persistence. `PixelFacePainter` renders white facial features on a clipped
+32×24 grid. Conversation replies switch the session to Follow plant and publish
+a reply ID/deadline; local timers animate mouth, blink and gaze, without audio.
+Completion or selection of another plant/mode cancels the reply. Replay changes
+only display state. System/app reduced motion and the studio pause control stop
+facial motion. The frame carries no message text. Native loopback and web
+same-origin storage transport remain read-only from the viewer's perspective.
+See `PIXEL_DISPLAY.md` for version compatibility, disconnect handling and hardware
+boundaries, and `PRODUCT_NAVIGATION.md` for the testing workflow.

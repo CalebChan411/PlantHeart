@@ -142,7 +142,7 @@ class LabPage extends StatelessWidget {
             ),
           ),
         const Text(
-          'Showing the latest 10 of up to 100 saved readings. Sliders update Home, Care Guide and Chat immediately.',
+          'Showing the latest 10 of up to 100 saved readings. Sliders update Home, Care and the conversation simulator immediately.',
         ),
       ],
     );

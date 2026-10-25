@@ -2,85 +2,92 @@ import '../services/engines.dart';
 import 'plant_data.dart';
 
 enum PixelExpression {
-  happy(
-    'Happy',
-    'Healthy conditions',
-    'Everything feels balanced. A big smile and a cheeky wink.',
-  ),
-  calm(
-    'Calm',
-    'Comfortable / resting',
-    'A quiet, neutral face. There is no urgent care alert.',
-  ),
-  thirsty(
-    'Thirsty',
-    'Dry soil',
-    'Drooping eyes and a little blue drop: check the soil.',
-  ),
-  sleepy(
-    'Sleepy',
-    'Low light',
-    'Closed eyes and a drifting Z: a dim-day simulation.',
-  ),
-  hot(
-    'Too warm',
-    'Hot day',
-    'A worried mouth and a sweat drop: check temperature.',
-  ),
+  happy('Happy', 'Healthy conditions', 'A friendly wink and an open smile.'),
+  calm('Calm', 'Comfortable / resting', 'Relaxed eyes and a quiet mouth.'),
+  thirsty('Thirsty', 'Dry soil', 'Drooping eyes and an uneven worried mouth.'),
+  sleepy('Sleepy', 'Low light', 'Closed eyes and a small yawn.'),
+  hot('Too warm', 'Hot day', 'Tense eyebrows and a panting mouth.'),
   lonely(
     'Missing you',
     'No recent interaction',
-    'A small frown and a tear: a fictional companion cue.',
+    'Downcast eyes and a small frown.',
   ),
   curious('Curious', 'A new interaction', 'Wide eyes and a small round mouth.'),
   loved(
     'Encouraged',
     'After a care check',
-    'Happy eyes and little hearts. A preview of positive feedback.',
+    'Happy curved eyes and a broad smile.',
   );
 
   final String title, scenario, description;
   const PixelExpression(this.title, this.scenario, this.description);
 }
 
-/// Display-only payload; it never contains chat, memories or device commands.
+enum InteractionPhase { idle, replying }
+
+/// Version 2 carries only animation timing, never the actual conversation text.
+/// Version-1 display frames can still be read, with idle animation defaults.
 class ExpressionFrame {
   final PixelExpression expression;
   final String name, source;
   final bool monochrome, reducedMotion;
+  final InteractionPhase interaction;
+  final int replyId, replyEndsAtMs;
   const ExpressionFrame({
     required this.expression,
     this.name = 'Milo',
     this.source = 'Scenario preview',
-    this.monochrome = false,
+    this.monochrome = true,
     this.reducedMotion = false,
+    this.interaction = InteractionPhase.idle,
+    this.replyId = 0,
+    this.replyEndsAtMs = 0,
   });
+  bool replyingAt(DateTime time) =>
+      interaction == InteractionPhase.replying &&
+      time.millisecondsSinceEpoch < replyEndsAtMs;
   Map<String, dynamic> toJson() => {
-    'version': 1,
+    'version': 2,
     'expression': expression.name,
     'name': name,
     'source': source,
-    'monochrome': monochrome,
+    'monochrome': true,
     'reducedMotion': reducedMotion,
+    'interaction': interaction.name,
+    'replyId': replyId,
+    'replyEndsAtMs': replyEndsAtMs,
   };
   factory ExpressionFrame.fromJson(Map<String, dynamic> json) {
-    if (json['version'] != 1) {
+    if (![1, 2].contains(json['version']) ||
+        json['name'] is! String ||
+        json['source'] is! String) {
       throw const FormatException('Unsupported display frame');
     }
+    final expression = PixelExpression.values
+        .where((e) => e.name == json['expression'])
+        .firstOrNull;
+    if (expression == null) {
+      throw const FormatException('Invalid display expression');
+    }
+    final phase =
+        InteractionPhase.values
+            .where((p) => p.name == json['interaction'])
+            .firstOrNull ??
+        InteractionPhase.idle;
     return ExpressionFrame(
-      expression: PixelExpression.values.firstWhere(
-        (e) => e.name == json['expression'],
-      ),
+      expression: expression,
       name: json['name'] as String,
       source: json['source'] as String,
-      monochrome: json['monochrome'] == true,
       reducedMotion: json['reducedMotion'] == true,
+      interaction: phase,
+      replyId: json['replyId'] is int ? json['replyId'] as int : 0,
+      replyEndsAtMs: json['replyEndsAtMs'] is int
+          ? json['replyEndsAtMs'] as int
+          : 0,
     );
   }
 }
 
-/// Display cues are separate from the four-dimensional emotion model. A hot/low
-/// light cue can therefore be shown without claiming to change the emotion rules.
 PixelExpression expressionFor(PlantData data, PlantEmotion emotion) {
   if (data.sensors.temperature > data.profile.maxTemperature) {
     return PixelExpression.hot;

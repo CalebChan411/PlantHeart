@@ -11,7 +11,7 @@ class CarePage extends StatelessWidget {
   Widget build(BuildContext context) => PageBody(
     title: 'A little care,\na happier plant.',
     subtitle:
-        'For your ${controller.data.profile.name}. Updated from the Sensor Lab.',
+        'For your ${controller.data.profile.name}, based on its latest readings.',
     eyebrow: 'THE CARE GUIDE',
     children: [
       const Tag('Illustrative prototype rules', color: sun),
@@ -120,7 +120,7 @@ class WeatherPage extends StatelessWidget {
             );
           },
           icon: const Icon(Icons.science_outlined),
-          label: const Text('Apply scenario to Sensor Lab'),
+          label: const Text('Apply scenario to readings'),
         ),
         const Text(
           'Selecting previews and saves a scenario. Apply changes all five simulated readings. Locations are labels only; no location permissions or weather services are used.',

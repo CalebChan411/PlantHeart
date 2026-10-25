@@ -37,6 +37,7 @@ class PlantController extends ChangeNotifier {
           name: data.name,
           reducedMotion: data.reducedMotion,
         ),
+        activePlantId: () => activePlantId,
       );
   @override
   void dispose() {
@@ -179,9 +180,9 @@ class PlantController extends ChangeNotifier {
   });
   Future<bool> send(String text) async {
     if (text.trim().isEmpty) return false;
-    return change(() {
+    final response = PlantAgent().respond(text, data, emotion);
+    final saved = change(() {
       data.messages.add(entry(text, 'user'));
-      final response = PlantAgent().respond(text, data, emotion);
       data.messages.add(entry(response.text, 'plant'));
       if (response.memory != null) {
         data.memories.add(entry(response.memory!));
@@ -189,6 +190,8 @@ class PlantController extends ChangeNotifier {
       }
       data.lastInteraction = clock();
     });
+    pixelDisplay.playReply(response.text);
+    return saved;
   }
 
   Future<bool> saveEntry(

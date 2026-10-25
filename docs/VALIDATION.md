@@ -211,3 +211,63 @@ Native Windows execution and the prior AXTree issue remain unverified here.
 
 Source publication requires explicit user approval and is separate from
 environment publication. Consult Git history for the approved revision.
+
+## Product navigation, More test dialogs and monochrome replies
+
+The main bar now contains **Home, Community, Memoir, Care, More**. Lab and Chat
+moved into More as Sensor simulator and Conversation simulator; Weather simulator
+and Pixel Display Studio join them as closable dialogs. Library and Settings
+retain standard detail routes. `PLANT_HEART_TEST_TOOLS=false` hides all four test
+entry points without changing the five product destinations.
+
+The display renderer now draws only white pixel eyes, eyebrows and mouth on a
+black 32×24 grid. It has no filled head, avatar ring or color mode. A typed local
+reply starts a six-shape mouth cycle in the conversation dialog and independent
+viewer. It ends automatically, can replay without adding messages, respects
+reduced motion, and cancels on plant/mode changes. Version-2 display frames add
+reply IDs/deadlines without transmitting conversation text; v1 frames remain
+readable. No persistent plant schema or dependency changes were needed.
+
+Executed checks for this update (Linux cloud host):
+
+- `flutter analyze`: **no issues**; formatting and `git diff --check` clean.
+- `flutter test --reporter expanded`: **49 passed**, zero failures/skips
+  (32 unit/transport tests and 17 widget tests).
+- Flag-specific run of `test/product_navigation_test.dart` with
+  `--dart-define=PLANT_HEART_TEST_TOOLS=false`: **1 passed**.
+- Raster checks confirm all eight scenes contain only opaque black/white pixels,
+  sparse facial marks rather than a filled head, different reply mouth frames,
+  reduced-motion stability, and correct clipping around the preview. The clipping
+  check prevents the black painter from obscuring surrounding tool buttons/text.
+- Controller checks confirm one reply cycle per message, timeout to idle, replay
+  without duplicate messages and cancellation when selecting another plant.
+- Widget workflows cover all five product destinations, all four tool dialogs,
+  close buttons, typing and memory capture into Memoir, sensor/weather propagation,
+  expression selection/tour/gallery, Settings/Library back routes and semantic
+  boundary stability. The narrow 360×740 larger-text check also sends a message
+  from the responsive conversation dialog without overflow.
+- `flutter build web --release --no-web-resources-cdn`: **passed**. The existing
+  unused Cupertino font-subset notice remains informational.
+- Chromium release workflow: onboarded, verified product tabs, opened typed
+  conversation and a separate display, captured changing reply frames, waited for
+  idle, replayed without extra messages, applied Dry Soil in the sensor dialog,
+  checked Home/Care and Thirsty display, found the captured memory in Memoir,
+  opened Community and all four tools, selected Too warm, opened the expression
+  sheet, and verified the disconnection warning after closing the main window.
+  The completed workflow recorded **zero JavaScript page errors and zero external
+  network requests**. Flutter widget tests exercise pointer taps; the browser
+  workflow also uses accessibility actions for modal controls where Chromium's
+  generated Flutter semantics overlay intercepts DOM locator clicks.
+- Actual UI screenshots and a GIF assembled from captured viewer frames are in
+  `docs/screenshots/product-tools`. These are rendered application captures.
+
+Conversation input is a typed stand-in for future voice. There is no microphone,
+ASR, generated audio, TTS or phoneme synchronization; duration is a text-length
+heuristic. Community remains device-local. Physical screen/sensor integration,
+Windows native viewer launch and the prior Windows AXTree issue still require
+validation on the relevant devices. Cloud/browser success does not resolve that
+native accessibility report.
+
+Source publication requires explicit user approval, separately from environment
+publication. The user approved publication of this update after reviewing its
+changes and validation results.

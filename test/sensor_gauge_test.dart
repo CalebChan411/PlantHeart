@@ -125,9 +125,16 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(NavigationBar),
-          matching: find.text('Lab'),
+          matching: find.text('More'),
         ),
       );
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Sensor simulator'),
+        200,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.tap(find.text('Sensor simulator'));
       await tester.pumpAndSettle();
       expect(find.text('A tiny plant lab.'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());

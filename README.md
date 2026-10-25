@@ -4,7 +4,7 @@ A friendly, offline Flutter plant companion for the AY 2026–2027 final-year
 project. Meet **Milo**, explore simulated care conditions, keep memories and grow
 a little routine. No hardware, keys, accounts, paid services or external AI needed.
 
-![Plant Heart Home](docs/screenshots/plant-overview/mobile.png)
+![Plant Heart Home](docs/screenshots/product-tools/home-navigation.png)
 
 ## Run on Windows
 
@@ -38,15 +38,26 @@ offline. There is no backend to start and no `.env` or secret configuration.
 - **First run:** plant name, species and personality; optional defaults; locally saved.
 - **Home:** animated plants with arrow switching, five compact readings visible
   together, direct care advice and earned daily care check-ins.
-- **Lab:** five bounded sensor sliders, four presets, saved snapshots and recent
-  moisture bars with expandable reading details.
-- **Chat:** deterministic profile/sensor-aware responses, explicit `Remember that …`
-  capture, latest-memory recall, suggested prompts, keyboard send and persistent chat.
-- **Garden:** memory and journey views; add/edit/confirmed delete, timestamps,
+- **Community:** local posts, likes, virtual visits and an earned three-day challenge.
+- **Memoir:** memories and growth journey; add/edit/confirmed delete, timestamps,
   lifecycle selection, activity timeline and copyable journey summary.
-- **More:** care recommendations, simulated weather/location, local community
-  posts/likes/visits and an earned three-day challenge, three plant-library profiles,
-  settings, accessibility and deliberate local data clearing/reset.
+- **Care:** species-aware recommendations based on the selected plant's readings.
+- **More:** plant library and settings, plus a separate **Prototype testing** area.
+  Sensor, conversation, weather and pixel-display tools each open in a closable
+  popup. Chat and Lab are no longer bottom-navigation destinations.
+- **Conversation simulator:** typed input stands in for future voice input.
+  Persistent deterministic replies, explicit `Remember that …` capture, latest
+  recall and suggested prompts remain available. Replies trigger black-and-white
+  pixel mouth/eye animation in both the popup and the separate display window.
+
+To hide prototype test entries in a product build, run:
+
+```powershell
+flutter run -d windows --dart-define=PLANT_HEART_TEST_TOOLS=false
+```
+
+This controls entry visibility; physical sensors, voice input and real social
+networking still need implementation. See [navigation and demo guide](docs/PRODUCT_NAVIGATION.md).
 
 All UI is English. Care and emotion rules are illustrative; this app does not
 measure real plant emotions or provide validated horticultural or medical advice.
@@ -103,8 +114,8 @@ must still be verified on Windows; it cannot run on this Linux cloud host.
 
 
 Windows follow-up: a user confirmed native launch, but reported repeated Flutter
-AXTree accessibility errors during interaction. The latest change reduces global
-semantics rebuilds and passes 20 tests; Windows confirmation is still pending.
+AXTree accessibility errors during interaction. A previous change reduced global
+semantics rebuilds; native Windows confirmation is still pending.
 See the follow-up in `docs/VALIDATION.md`. Do not treat Linux/widget success as
 proof of native Windows accessibility correctness.
 
@@ -112,10 +123,15 @@ proof of native Windows accessibility correctness.
 ## New local preview: Pixel Display Studio
 
 Open **More → Pixel Display Studio → Open display window** for a separate pixel
-face window. Preview eight expressions, follow Lab/Weather, cycle scenes, switch to
-monochrome, or open the comparison sheet. Manual previews never change plant data.
-The logical artwork is 32×32 pixels and respects reduce-motion preferences.
+face window. Preview eight expressions, follow the selected plant, cycle scenes
+or open the comparison sheet. Output is white eyes, eyebrows and mouth on black,
+without a head silhouette or avatar ring. The logical artwork is **32×24 pixels**.
+Manual scenes never change plant data. Replies from **More → Conversation
+simulator** animate the same display; replay does not add another message.
+Animation respects system/app reduced motion and the studio's pause control.
 See [pixel display details](docs/PIXEL_DISPLAY.md).
+
+![Actual reply animation](docs/screenshots/product-tools/reply-animation.gif)
 
 The second native window uses a temporary loopback-only connection (127.0.0.1);
 the browser popup uses same-origin local storage. No external service is required.

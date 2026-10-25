@@ -51,7 +51,6 @@ void main() {
     () {
       final before = jsonEncode(c.data.toJson());
       c.pixelDisplay.select(PixelExpression.loved);
-      c.pixelDisplay.setMonochrome(true);
       c.pixelDisplay.setPauseMotion(true);
       expect(c.pixelDisplay.frame.expression, PixelExpression.loved);
       expect(c.pixelDisplay.frame.monochrome, isTrue);
@@ -100,34 +99,61 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Pixel Display Studio'),
+        220,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.tap(find.text('Pixel Display Studio'));
       await tester.pumpAndSettle();
+      Future<void> revealInStudio(Finder target, double delta) async {
+        final list = find
+            .descendant(
+              of: find.byType(Dialog),
+              matching: find.byType(ListView),
+            )
+            .first;
+        final scroll = find
+            .descendant(of: list, matching: find.byType(Scrollable))
+            .first;
+        // Selecting a manual scene removes the tall follow-state explanation.
+        // Start from the top so lazy children cannot move above the search.
+        tester.state<ScrollableState>(scroll).position.jumpTo(0);
+        await tester.pumpAndSettle();
+        await tester.scrollUntilVisible(
+          target,
+          delta.abs(),
+          scrollable: scroll,
+        );
+        await tester.pumpAndSettle();
+        for (
+          var i = 0;
+          i < 12 && target.hitTestable().evaluate().isEmpty;
+          i++
+        ) {
+          final dialog = tester.getRect(find.byType(Dialog));
+          final dy = target.evaluate().isEmpty
+              ? delta
+              : tester.getCenter(target).dy < dialog.top
+              ? -180.0
+              : 180.0;
+          await tester.drag(list, Offset(0, -dy));
+          await tester.pumpAndSettle();
+        }
+        expect(target.hitTestable(), findsOneWidget);
+      }
+
       final before = jsonEncode(c.data.toJson());
       for (final expression in PixelExpression.values) {
-        await tester.scrollUntilVisible(
-          find.text(expression.title),
-          180,
-          scrollable: find.byType(Scrollable).last,
-        );
+        await revealInStudio(find.text(expression.title), 180);
         await tester.tap(find.text(expression.title));
         await tester.pumpAndSettle();
         expect(c.pixelDisplay.frame.expression, expression);
       }
       expect(jsonEncode(c.data.toJson()), before);
-      await tester.scrollUntilVisible(
-        find.text('Monochrome display'),
-        180,
-        scrollable: find.byType(Scrollable).last,
-      );
-      await tester.tap(find.text('Monochrome display'));
-      await tester.pumpAndSettle();
       expect(c.pixelDisplay.frame.monochrome, isTrue);
       // Scroll back up to the mode selector.
-      await tester.scrollUntilVisible(
-        find.text('Auto preview'),
-        -200,
-        scrollable: find.byType(Scrollable).last,
-      );
+      await revealInStudio(find.text('Auto preview'), -200);
       await tester.tap(find.text('Auto preview'));
       await tester.pump();
       await tester.pump(const Duration(seconds: 3));
@@ -135,11 +161,7 @@ void main() {
       c.pixelDisplay.setMode(PreviewMode.follow);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      await tester.scrollUntilVisible(
-        find.text('Compare all expressions'),
-        -200,
-        scrollable: find.byType(Scrollable).last,
-      );
+      await revealInStudio(find.text('Compare all expressions'), -200);
       await tester.tap(find.text('Compare all expressions'));
       await tester.pumpAndSettle();
       expect(find.byType(PixelFace), findsNWidgets(8));
