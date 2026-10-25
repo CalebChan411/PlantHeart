@@ -113,6 +113,7 @@ void main() {
     await start(tester);
     await nav(tester, 'More');
     for (final title in [
+      'Pixel Display Studio',
       'Care Guide',
       'Weather',
       'Community',

@@ -97,3 +97,39 @@ values and distinct increase/decrease announcements. These checks do not prove
 the native Windows error is resolved. This change is a mitigation pending Windows
 retest, not a confirmed diagnosis or engine fix. No Flutter SDK patch or downgrade
 was applied. Capture the first error from a cold start if the problem persists.
+
+## Pixel display simulation follow-up
+
+A new **More → Pixel Display Studio** module provides eight pixel expressions,
+an actual separate software viewer, manual/follow/auto modes, monochrome output,
+reduced motion and a comparison sheet. The display session follows state while
+navigating away from its controller page. It never edits sensor or reward data.
+No new package dependency or lockfile change was required.
+
+Final checks for this update:
+
+- `flutter analyze`: no issues.
+- `flutter test --reporter expanded`: **26 passed**, zero failures/skips
+  (17 unit/transport tests and 9 widget tests).
+- `flutter build web --release --no-web-resources-cdn`: passed; same informational
+  Cupertino fallback-font subset notice as before.
+- Chromium: opened a separate display popup; changed six manual expressions;
+  toggled monochrome; returned to Lab and confirmed a live Thirsty cue; opened the
+  eight-expression comparison sheet; closed the controller and confirmed stale-link
+  feedback. Zero JavaScript page errors and zero external network requests in the
+  final smoke run. An initial special-character font fallback was removed before
+  the final run, restoring the offline check.
+- Loopback transport test: a real local HTTP server/receiver exchange, frame
+  updates, wrong-channel 404, endpoint restriction and shutdown passed. Process
+  launch is injected in this test; it does not prove Windows process creation.
+- Screenshots captured from the implemented Flutter UI, not mockup images:
+  `docs/screenshots/pixel-display/expression-sheet.png` and the individual window
+  images in the same folder.
+
+Windows runner arguments/title/initial size are prepared for the display-only
+process. Actual Windows native second-window creation remains **unverified on
+this Linux host**, as does the earlier Windows AXTree issue. No physical screen,
+firmware or display transport has been implemented. See `PIXEL_DISPLAY.md`.
+
+Source publication is handled separately from environment publication and
+requires explicit user approval. Consult Git history for the published revision.

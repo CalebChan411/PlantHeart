@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../features/chat.dart';
+import '../features/expression_screen/expression_screen.dart';
 import '../features/garden.dart';
 import '../features/home.dart';
 import '../features/lab.dart';
@@ -190,6 +191,15 @@ class _ShellState extends State<_Shell> {
     eyebrow: 'YOUR GROWING TOOLKIT',
     children: [
       for (final tool in <(IconData, String, String, VoidCallback)>[
+        (
+          Icons.grid_on_rounded,
+          'Pixel Display Studio',
+          'Preview expressions in a separate screen window',
+          () => open(
+            'Pixel Display Studio',
+            () => ExpressionScreenPage(controller: c),
+          ),
+        ),
         (
           Icons.favorite_outline,
           'Care Guide',

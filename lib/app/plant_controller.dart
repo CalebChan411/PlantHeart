@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import '../models/plant_data.dart';
+import '../models/expression_frame.dart';
+import 'pixel_display_controller.dart';
 import '../services/engines.dart';
 import '../services/local_repository.dart';
 
@@ -17,6 +19,22 @@ class PlantController extends ChangeNotifier {
     DateTime Function()? now,
     this.notice,
   }) : clock = now ?? DateTime.now;
+  PixelDisplayController? _display;
+  PixelDisplayController get pixelDisplay =>
+      _display ??= PixelDisplayController(
+        this,
+        () => ExpressionFrame(
+          expression: expressionFor(data, emotion),
+          name: data.name,
+          reducedMotion: data.reducedMotion,
+        ),
+      );
+  @override
+  void dispose() {
+    _display?.dispose();
+    super.dispose();
+  }
+
   PlantEmotion get emotion => EmotionEngine().evaluate(data, clock());
   List<CareTip> get care => CareEngine().evaluate(data.sensors, data.profile);
   String get today => clock().toIso8601String().substring(0, 10);

@@ -107,3 +107,18 @@ AXTree accessibility errors during interaction. The latest change reduces global
 semantics rebuilds and passes 20 tests; Windows confirmation is still pending.
 See the follow-up in `docs/VALIDATION.md`. Do not treat Linux/widget success as
 proof of native Windows accessibility correctness.
+
+
+## New local preview: Pixel Display Studio
+
+Open **More → Pixel Display Studio → Open display window** for a separate pixel
+face window. Preview eight expressions, follow Lab/Weather, cycle scenes, switch to
+monochrome, or open the comparison sheet. Manual previews never change plant data.
+The logical artwork is 32×32 pixels and respects reduce-motion preferences.
+See [pixel display details](docs/PIXEL_DISPLAY.md).
+
+The second native window uses a temporary loopback-only connection (127.0.0.1);
+the browser popup uses same-origin local storage. No external service is required.
+This is a software screen simulator; no physical display driver is implemented.
+Close all Plant Heart windows before rebuilding on Windows. Windows native launch
+of the second process still requires testing on a Windows machine.

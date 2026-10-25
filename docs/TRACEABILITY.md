@@ -33,3 +33,10 @@ working on-device behavior with deterministic/mock inputs, tested in this phase.
 
 See `VALIDATION.md` for actual executed checks and limitations. Screen presence
 alone is not used as evidence for unimplemented proposal integrations.
+
+
+Pixel-display follow-up: an original 32×32 expression renderer and standalone
+software viewer now provide eight selectable scenes, follow-state behavior,
+blinking, monochrome preview and a reference sheet. This advances the expression
+library prototype; it does not implement firmware, a physical pixel screen or a
+hardware communication protocol. See `PIXEL_DISPLAY.md` for the boundary.

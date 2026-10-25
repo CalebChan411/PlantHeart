@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'app/app.dart';
+import 'models/expression_frame.dart';
+import 'features/expression_screen/expression_screen.dart';
 import 'app/plant_controller.dart';
 import 'services/local_repository.dart';
 
-Future<void> main() async {
+Future<void> main(List<String> arguments) async {
   WidgetsFlutterBinding.ensureInitialized();
+  final source = displaySource(arguments);
+  if (source != null) {
+    runApp(ExpressionDisplayApp(source: source));
+    return;
+  }
   try {
     final repository = LocalRepository(await SharedPreferences.getInstance());
     final loaded = await repository.load();
@@ -35,7 +42,7 @@ Future<void> main() async {
                   ),
                   const SizedBox(height: 16),
                   FilledButton(
-                    onPressed: main,
+                    onPressed: () => main(arguments),
                     child: const Text('Retry opening Plant Heart'),
                   ),
                 ],

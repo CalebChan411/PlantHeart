@@ -23,3 +23,4 @@ feature matrix existed in the empty checkout.
 | Persistence/recovery | One ordered document, original-data recovery backups, save retry | Full round-trip, concurrent writes, corrupt-data and failed-write tests |
 | Windows | Official runner, plugin registration, launch/build scripts | Generated and reviewed; compile/run still requires Windows |
 | Web validation target | Local renderer assets and native browser storage | Release build and Chromium functional/reload smoke test |
+| Pixel display preview | Eight pixel expressions; manual/follow/tour modes, monochrome, reference sheet, separate viewer window | Flutter UI and loopback transport tests; physical-screen integration and native Windows launch still unverified |
