@@ -133,3 +133,37 @@ firmware or display transport has been implemented. See `PIXEL_DISPLAY.md`.
 
 Source publication is handled separately from environment publication and
 requires explicit user approval. Consult Git history for the published revision.
+
+## Home five-zone reading overview
+
+The Home reading chips now form five centered, vertically ordered status cards.
+Each shows units, a textual five-zone status, species-specific target range,
+colored segments, current-position pointer and an interactive numeric-range
+explanation. Each card is an independent scroll item. The Lab shortcut was tested
+through normal pointer/scroll gestures. The ordinal display scale and its prototype
+outer-zone thresholds are explained on the page and in `HOME_GAUGES.md`.
+
+Checks for this update:
+
+- `flutter analyze`: no issues; formatting check passed.
+- `flutter test --reporter expanded`: **32 passed**, zero failed/skipped
+  (21 unit/transport tests and 11 widget tests).
+- Six new tests cover all five classifications, inclusive ideal endpoints,
+  pointer ordering/clamping, species changes, precise numeric formatting,
+  sequential Home card order, range details, Lab navigation and 320px width
+  with 2x text scale and extreme readings.
+- `flutter build web --release --no-web-resources-cdn`: passed.
+- Chromium functional check: rendered all five readings, applied Hot Day in Lab,
+  verified low soil moisture, high temperature and low humidity propagated to
+  Home, opened the numeric-range dialog, and used Change readings in Lab.
+  Zero JavaScript page errors or external network requests in this run.
+- Actual UI screenshots: `docs/screenshots/home-gauges/ideal-readings.png` and
+  `hot-day-readings.png`.
+
+No sensor persistence schema, dependencies, care-engine thresholds or emotion
+rules changed. The five-zone outside bands are display-only subdivisions.
+Native Windows behavior of this update has not been retested on this Linux host;
+the earlier AXTree report remains a separate Windows validation item.
+
+Source publication requires explicit user approval and is separate from
+environment publication. Consult Git history for the approved revision.

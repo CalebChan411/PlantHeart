@@ -122,3 +122,11 @@ the browser popup uses same-origin local storage. No external service is require
 This is a software screen simulator; no physical display driver is implemented.
 Close all Plant Heart windows before rebuilding on Windows. Windows native launch
 of the second process still requires testing on a Windows machine.
+
+## Home reading overview
+
+Home now stacks all five environmental readings in the center of the page. Each
+has a value/unit, five labelled status bands, a pointer and an Ideal range derived
+from the active species. The scale displays five care zones rather than a linear
+number line. Info buttons explain numeric boundaries; **Change readings in Lab**
+opens the existing controls. See [Home status-bar rules](docs/HOME_GAUGES.md).

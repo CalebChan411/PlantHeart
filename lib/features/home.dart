@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../app/plant_controller.dart';
 import '../widgets/design.dart';
 import '../widgets/milo.dart';
+import '../widgets/sensor_status.dart';
 
 class HomePage extends StatelessWidget {
   final PlantController controller;
@@ -80,16 +81,7 @@ class HomePage extends StatelessWidget {
             ],
           ),
         ),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            Tag('Soil ${d.sensors.moisture.round()}%', color: sky),
-            Tag('${d.sensors.temperature.round()}°C', color: sun),
-            Tag('${d.sensors.light.round()} lux'),
-            const Tag('Simulated', color: coral),
-          ],
-        ),
+        ...plantConditionSections(data: d, openLab: () => select(1)),
         SoftCard(
           color: sun,
           child: Column(
