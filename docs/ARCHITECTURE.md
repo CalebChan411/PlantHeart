@@ -65,3 +65,12 @@ one local calendar date per day. The local challenge needs three distinct care
 dates and a deliberate join. Clock manipulation is not prevented. No XP, invented
 streak, or fabricated earned reward is shown. Simulated interactions never claim
 that a real plant has been watered or another person received a post/visit.
+
+
+## Multi-plant collection
+
+PlantController now owns a version-2 PlantCollection and exposes its selected
+PlantData to the existing services/screens. Each record keeps its original data
+format, and all record edits and selection changes share the ordered write queue.
+The former single-plant document is accepted and preserved before migration.
+Read `PLANT_COLLECTION.md` for schema, backup, preference scope and Home layout.

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../features/chat.dart';
+import '../features/add_plant.dart';
 import '../features/expression_screen/expression_screen.dart';
 import '../features/garden.dart';
 import '../features/home.dart';
@@ -101,7 +102,13 @@ class _ShellState extends State<_Shell> {
           ],
         ),
         actions: [
-          if (c.data.onboarded)
+          if (c.data.onboarded && selected == 0)
+            IconButton(
+              tooltip: 'Add plant',
+              onPressed: () => showAddPlant(context, c),
+              icon: const Icon(Icons.add_circle_rounded, color: leaf, size: 30),
+            ),
+          if (c.data.onboarded && selected != 0)
             Padding(
               padding: const EdgeInsets.only(right: 14),
               child: Tag('${c.data.checkInDays.length} care days'),
@@ -128,6 +135,7 @@ class _ShellState extends State<_Shell> {
                           select: (i) => setState(() => selected = i),
                           openCare: care,
                           openWeather: weather,
+                          editProfile: profile,
                         ),
                         1 => LabPage(controller: c),
                         2 => ChatPage(controller: c),

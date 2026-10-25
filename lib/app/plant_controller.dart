@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import '../models/plant_data.dart';
+import '../models/plant_collection.dart';
 import '../models/expression_frame.dart';
 import 'pixel_display_controller.dart';
 import '../services/engines.dart';
@@ -9,16 +10,24 @@ import '../services/local_repository.dart';
 class PlantController extends ChangeNotifier {
   final LocalRepository repository;
   final DateTime Function() clock;
-  PlantData data;
+  PlantCollection _collection;
+  PlantData get data => _collection.active.data;
+  set data(PlantData value) => _collection.active.data = value;
+  List<PlantRecord> get plants => List.unmodifiable(_collection.plants);
+  String get activePlantId => _collection.activeId;
+  int get activePlantIndex =>
+      _collection.plants.indexWhere((p) => p.id == activePlantId);
   String? storageError, notice;
   Future<void>? _pending;
   int _serial = 0;
   PlantController(
     this.repository,
-    this.data, {
+    PlantData data, {
+    PlantCollection? collection,
     DateTime Function()? now,
     this.notice,
-  }) : clock = now ?? DateTime.now;
+  }) : _collection = collection ?? PlantCollection.single(data),
+       clock = now ?? DateTime.now;
   PixelDisplayController? _display;
   PixelDisplayController get pixelDisplay =>
       _display ??= PixelDisplayController(
@@ -56,7 +65,10 @@ class PlantController extends ChangeNotifier {
   /// can never overwrite a newer edit. Failed writes remain visible and retryable.
   Future<bool> change(VoidCallback edit) {
     edit();
-    final document = jsonEncode(data.toJson());
+    for (final plant in _collection.plants) {
+      _copyPreferences(data, plant.data);
+    }
+    final document = jsonEncode(_collection.toJson());
     notifyListeners();
     final operation = (_pending ?? Future<void>.value()).then((_) async {
       try {
@@ -82,6 +94,45 @@ class PlantController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _copyPreferences(PlantData from, PlantData to) {
+    to.largeText = from.largeText;
+    to.reducedMotion = from.reducedMotion;
+    to.checkIns = from.checkIns;
+    to.sharing = from.sharing;
+  }
+
+  Future<bool> selectPlant(String id) {
+    if (!_collection.plants.any((p) => p.id == id)) return Future.value(false);
+    return change(() {
+      final previous = data;
+      _collection.activeId = id;
+      _copyPreferences(previous, data);
+    });
+  }
+
+  Future<bool> stepPlant(int direction) => selectPlant(
+    _collection
+        .plants[(activePlantIndex + direction) % _collection.plants.length]
+        .id,
+  );
+  Future<bool> addPlant(String name, String species, String personality) =>
+      change(() {
+        final next = PlantData()
+          ..name = name.trim().isEmpty ? 'New plant' : name.trim()
+          ..species = plantProfiles.any((p) => p.id == species)
+              ? species
+              : 'pothos'
+          ..personality = personalities.contains(personality)
+              ? personality
+              : 'Gentle'
+          ..onboarded = true;
+        _copyPreferences(data, next);
+        next.sensors = SensorService().healthy(next.profile);
+        final id = 'plant_${clock().microsecondsSinceEpoch}_${_serial++}';
+        _collection.plants.add(PlantRecord(id, next));
+        _collection.activeId = id;
+        _activity('Added ${next.name} to your plants.');
+      });
   Future<bool> retrySave() => change(() {});
   Future<void> flush() => _pending ?? Future<void>.value();
   Future<bool> profile(
@@ -235,7 +286,7 @@ class PlantController extends ChangeNotifier {
         data.snapshots.clear();
         data.activities.clear();
       case 'reset':
-        data = PlantData();
+        _collection = PlantCollection.single(PlantData());
     }
   });
   String get journeySummary =>
@@ -244,7 +295,7 @@ class PlantController extends ChangeNotifier {
       '${data.milestones.map((e) => '${dateLabel(e.at)} — ${e.text}').join('\n')}\n'
       'Memories\n${data.memories.map((e) => '${dateLabel(e.at)} — ${e.text}').join('\n')}';
   String get dataSummary =>
-      'Plant Heart · local data only\n${data.name} · ${data.profile.name}\n'
+      'Plant Heart · local data only · ${plants.length} plants\nSelected: ${data.name} · ${data.profile.name}\n'
       '${data.memories.length} memories · ${data.milestones.length} milestones\n'
       '${data.messages.length} chat messages · ${data.snapshots.length} snapshots\n'
       '${data.posts.where((p) => !p.sample).length} local posts · ${data.checkInDays.length} care days\n'

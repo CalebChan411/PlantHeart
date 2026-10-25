@@ -68,7 +68,11 @@ void main() {
       final loaded = await c.repository.load();
       expect(loaded.warning, isNull);
       expect(loaded.data.reducedMotion, isTrue);
-      final restarted = PlantController(c.repository, loaded.data);
+      final restarted = PlantController(
+        c.repository,
+        loaded.data,
+        collection: loaded.collection,
+      );
       await tester.pumpWidget(const SizedBox());
       await tester.pumpWidget(PlantHeartApp(controller: restarted));
       await settle(tester);
@@ -88,7 +92,7 @@ void main() {
     await settle(tester);
     expect(c.data.sensors.moisture, 12);
     await nav(tester, 'Home');
-    expect(find.text('Thirsty'), findsOneWidget);
+    expect(find.textContaining('Thirsty'), findsOneWidget);
     await nav(tester, 'Chat');
     await tester.enterText(
       find.byType(TextField),

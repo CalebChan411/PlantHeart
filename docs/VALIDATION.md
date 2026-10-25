@@ -167,3 +167,47 @@ the earlier AXTree report remains a separate Windows validation item.
 
 Source publication requires explicit user approval and is separate from
 environment publication. Consult Git history for the approved revision.
+
+## Compact Home and independent plant collection
+
+Home is now a fixed overview at standard text size rather than a long list of
+large cards. Five compact three-band rows, values, plant illustration, arrows,
+selected name/species/mood, check-in and care entry fit together. Row taps retain
+exact ranges and detailed five-zone status. History and other modules remain in
+the existing destinations. The three bands are explicitly ordinal care ranges.
+
+The header Add plant dialog creates an independent record. Wrapping arrows select
+records using a 320ms slide/fade; each species has different vector foliage.
+Selection is persisted. Reduced motion resets the switcher so pending transitions
+are stopped and subsequent motion uses the requested preference.
+
+Validation of this update:
+
+- `flutter analyze`: clean; format and whitespace checks passed.
+- `flutter test --reporter expanded`: **43 passed**, zero failures/skips
+  (28 unit/transport tests and 15 widget tests).
+- `flutter build web --release --no-web-resources-cdn`: passed; same informational
+  unused Cupertino font-subset notice as before.
+- Standard-size widget checks at 360×740, 390×844, 440×900 and 480×960 confirm no
+  Home scrollable and all five reading rows inside the visible area. The desktop
+  larger-text preference is checked, as is non-clipping fallback for 2x text.
+- Actual animation test observes both outgoing/incoming plant widgets during the
+  transition and only the selected plant after completion.
+- Seven collection tests cover lossless legacy conversion and backup, independent
+  sensor/chat/memory/journal/community/check-in state, selected-record restoration,
+  preference scope, wrapping selection, rapid queued writes, reset/scoped clearing
+  and malformed collection recovery.
+- Chromium workflow added Snake Plant and Spider Plant through the real dialog,
+  switched arrows back to Milo, verified Milo's original 12% reading, refreshed
+  and verified three saved companions. Mobile screenshots show the full overview.
+  The completed smoke workflow had zero JavaScript page errors and zero external
+  network requests. Final UI screenshots are in `docs/screenshots/plant-overview`.
+
+The existing storage key now contains a version-2 collection of version-1 plant
+documents; the original single-plant string is preserved before migration writes.
+See `PLANT_COLLECTION.md` for schema, backup and rollback boundaries. Hardware
+pairing, multi-user accounts and per-plant physical displays are not implemented.
+Native Windows execution and the prior AXTree issue remain unverified here.
+
+Source publication requires explicit user approval and is separate from
+environment publication. Consult Git history for the approved revision.

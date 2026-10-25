@@ -1,6 +1,13 @@
-# Home sensor status bars
+# Home reading indicators
 
-The Home environmental reading chips are replaced with a centered vertical list
+The current Home uses compact, three-band rows (Low / Ideal / High) with ring
+pointers so the plant and all five readings fit together. Tap any row to open the
+full five-zone card and exact ranges. See `PLANT_COLLECTION.md` for current layout,
+plant selection and migration details. The detailed five-zone rules below remain
+unchanged; they now appear in the details view rather than five large Home cards.
+
+
+The original expanded reading design used a centered vertical list
 of five cards: soil moisture, light intensity, temperature, air humidity and soil
 pH. Each card shows its value/unit, a textual status, its species-specific ideal
 range, five labelled color zones and a high-contrast pointer. Readings are still

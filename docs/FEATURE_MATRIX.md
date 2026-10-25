@@ -24,4 +24,5 @@ feature matrix existed in the empty checkout.
 | Windows | Official runner, plugin registration, launch/build scripts | Generated and reviewed; compile/run still requires Windows |
 | Web validation target | Local renderer assets and native browser storage | Release build and Chromium functional/reload smoke test |
 | Pixel display preview | Eight pixel expressions; manual/follow/tour modes, monochrome, reference sheet, separate viewer window | Flutter UI and loopback transport tests; physical-screen integration and native Windows launch still unverified |
-| Home sensor status bars | Five centered, vertically stacked readings with five labels, current-value pointer, target ranges, explanations and Lab shortcut | Derived from active species; non-linear care-zone scale, no new sensor state |
+| Home sensor status bars | Five compact rows visible with the plant; three-band ring pointers and tappable five-zone/range details | Derived from active species; non-linear care-zone scale, no new sensor state |
+| Plant collection | Add named plants; animated wrapping arrow selection; independent data and saved active selection; distinct species foliage | Isolation, full reload, legacy migration/backup, reset and accessibility layout tests; no family accounts or hardware pairing |

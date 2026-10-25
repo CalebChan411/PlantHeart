@@ -4,7 +4,7 @@ A friendly, offline Flutter plant companion for the AY 2026–2027 final-year
 project. Meet **Milo**, explore simulated care conditions, keep memories and grow
 a little routine. No hardware, keys, accounts, paid services or external AI needed.
 
-![Plant Heart Home](docs/screenshots/home.png)
+![Plant Heart Home](docs/screenshots/plant-overview/mobile.png)
 
 ## Run on Windows
 
@@ -36,8 +36,8 @@ offline. There is no backend to start and no `.env` or secret configuration.
 ## What's inside
 
 - **First run:** plant name, species and personality; optional defaults; locally saved.
-- **Home:** original animated Milo, reactive expressions, care tip, sensors,
-  navigation shortcuts, earned daily care checks and recent activity.
+- **Home:** animated plants with arrow switching, five compact readings visible
+  together, direct care advice and earned daily care check-ins.
 - **Lab:** five bounded sensor sliders, four presets, saved snapshots and recent
   moisture bars with expandable reading details.
 - **Chat:** deterministic profile/sensor-aware responses, explicit `Remember that …`
@@ -58,8 +58,8 @@ measure real plant emotions or provide validated horticultural or medical advice
 sensor/weather rules, local agent and storage; `lib/features/` owns screens;
 `lib/widgets/` owns the design system and vector character.
 
-One `ChangeNotifier` controls shared state. Sensor or species changes feed all
-care, mood and chat views. Shared preferences stores a version-1 JSON document
+One `ChangeNotifier` controls the selected plant and its collection. Sensor or species changes feed all
+care, mood and chat views. Shared preferences stores a version-2 collection of version-1 plant documents
 (`plant_heart_v1`) on this device. Writes are ordered, failures are visible and
 retryable, and unreadable originals are preserved in recovery copies before
 showing defaults. Storage is **unencrypted**, local-only and not cloud backed up.
@@ -123,10 +123,17 @@ This is a software screen simulator; no physical display driver is implemented.
 Close all Plant Heart windows before rebuilding on Windows. Windows native launch
 of the second process still requires testing on a Windows machine.
 
-## Home reading overview
+## Compact Home and multiple plants
 
-Home now stacks all five environmental readings in the center of the page. Each
-has a value/unit, five labelled status bands, a pointer and an Ideal range derived
-from the active species. The scale displays five care zones rather than a linear
-number line. Info buttons explain numeric boundaries; **Change readings in Lab**
-opens the existing controls. See [Home status-bar rules](docs/HOME_GAUGES.md).
+Home now shows the plant and all five readings together, without scrolling at
+normal desktop/phone sizes. Compact rows have three labelled care bands and a
+ring pointer; tap for exact species ranges and detailed status. The scale is
+ordinal, not a linear ruler. Very small windows or extreme text scaling retain
+an accessibility scrolling fallback.
+
+Use the header **+** to add a plant and the left/right arrows to switch with a
+slide/fade transition. Each plant keeps its own readings, conversation, memories,
+journey and care records; the selection survives restart. Three species have
+distinct original vector foliage. Existing single-plant data is preserved and
+backed up before the first version-2 collection write. Earlier app versions do
+not read the new collection format. See [collection and migration details](docs/PLANT_COLLECTION.md).

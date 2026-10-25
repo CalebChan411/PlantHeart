@@ -4,13 +4,14 @@ import 'design.dart';
 
 /// Original vector character: no remote images or animation dependencies.
 class Milo extends StatefulWidget {
-  final String mood, name;
+  final String mood, name, species;
   final bool reducedMotion;
   final double height;
   const Milo({
     super.key,
     this.mood = 'Thriving',
     this.name = 'Milo',
+    this.species = 'pothos',
     this.reducedMotion = false,
     this.height = 260,
   });
@@ -63,7 +64,11 @@ class _MiloState extends State<Milo> with SingleTickerProviderStateMixin {
       child: AnimatedBuilder(
         animation: sway,
         builder: (context, child) => CustomPaint(
-          painter: _MiloPainter(widget.mood, (sway.value - .5) * .04),
+          painter: _MiloPainter(
+            widget.mood,
+            (sway.value - .5) * .04,
+            widget.species,
+          ),
           child: const SizedBox.expand(),
         ),
       ),
@@ -74,7 +79,8 @@ class _MiloState extends State<Milo> with SingleTickerProviderStateMixin {
 class _MiloPainter extends CustomPainter {
   final String mood;
   final double sway;
-  _MiloPainter(this.mood, this.sway);
+  final String species;
+  _MiloPainter(this.mood, this.sway, this.species);
   @override
   void paint(Canvas canvas, Size size) {
     canvas.save();
@@ -164,30 +170,97 @@ class _MiloPainter extends CustomPainter {
       );
     }
 
-    leafShape(
-      const Offset(165, 148),
-      const Offset(91, 103),
-      const Color(0xFF72B950),
-      -1,
-    );
-    leafShape(
-      const Offset(166, 126),
-      const Offset(245, 80),
-      const Color(0xFF60AD49),
-      1,
-    );
-    leafShape(
-      const Offset(169, 99),
-      const Offset(131, 40),
-      const Color(0xFF8ACB60),
-      -1,
-    );
-    leafShape(
-      const Offset(171, 85),
-      const Offset(200, 28),
-      const Color(0xFF4F9B43),
-      1,
-    );
+    if (species == 'snake') {
+      for (final offset in [-44.0, -17.0, 12.0, 38.0]) {
+        final x = 170 + offset * .5;
+        final tip = 170 + offset;
+        final top = 30 + offset.abs() * .6;
+        canvas.drawPath(
+          Path()
+            ..moveTo(x - 9, 182)
+            ..quadraticBezierTo(tip - 18, 95, tip, top)
+            ..quadraticBezierTo(tip + 16, 98, x + 10, 182)
+            ..close(),
+          p
+            ..style = PaintingStyle.fill
+            ..color = offset < 0
+                ? const Color(0xFF70A84D)
+                : const Color(0xFF438A48),
+        );
+        canvas.drawPath(
+          Path()
+            ..moveTo(x, 178)
+            ..quadraticBezierTo(tip + 3, 95, tip, top + 8),
+          Paint()
+            ..color = const Color(0xFFB7CE70)
+            ..strokeWidth = 3
+            ..style = PaintingStyle.stroke,
+        );
+      }
+    } else if (species == 'spider') {
+      for (final target in [
+        const Offset(62, 141),
+        const Offset(83, 93),
+        const Offset(118, 52),
+        const Offset(161, 37),
+        const Offset(204, 48),
+        const Offset(247, 89),
+        const Offset(276, 143),
+      ]) {
+        final ribbon = Path()
+          ..moveTo(165, 181)
+          ..cubicTo(145, 80, target.dx, target.dy - 55, target.dx, target.dy)
+          ..cubicTo(target.dx + 5, target.dy - 35, 170, 100, 175, 181)
+          ..close();
+        canvas.drawPath(
+          ribbon,
+          p
+            ..style = PaintingStyle.fill
+            ..color = const Color(0xFF71AE53),
+        );
+        canvas.drawPath(
+          Path()
+            ..moveTo(170, 175)
+            ..cubicTo(
+              159,
+              91,
+              target.dx + 3,
+              target.dy - 42,
+              target.dx,
+              target.dy,
+            ),
+          Paint()
+            ..color = const Color(0xFFDAE9AD)
+            ..strokeWidth = 2
+            ..style = PaintingStyle.stroke,
+        );
+      }
+    } else {
+      leafShape(
+        const Offset(165, 148),
+        const Offset(91, 103),
+        const Color(0xFF72B950),
+        -1,
+      );
+      leafShape(
+        const Offset(166, 126),
+        const Offset(245, 80),
+        const Color(0xFF60AD49),
+        1,
+      );
+      leafShape(
+        const Offset(169, 99),
+        const Offset(131, 40),
+        const Color(0xFF8ACB60),
+        -1,
+      );
+      leafShape(
+        const Offset(171, 85),
+        const Offset(200, 28),
+        const Color(0xFF4F9B43),
+        1,
+      );
+    }
     canvas.restore();
     final pot = Path()
       ..moveTo(111, 182)
@@ -252,5 +325,7 @@ class _MiloPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_MiloPainter oldDelegate) =>
-      oldDelegate.mood != mood || oldDelegate.sway != sway;
+      oldDelegate.mood != mood ||
+      oldDelegate.sway != sway ||
+      oldDelegate.species != species;
 }

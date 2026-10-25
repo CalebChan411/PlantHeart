@@ -7,6 +7,7 @@ import 'package:plant_heart/models/plant_data.dart';
 import 'package:plant_heart/models/sensor_gauge.dart';
 import 'package:plant_heart/services/local_repository.dart';
 import 'package:plant_heart/widgets/sensor_status.dart';
+import 'package:plant_heart/widgets/compact_sensor_status.dart';
 
 SensorGauge reading(double value) => SensorGauge(
   id: 'moisture',
@@ -85,67 +86,54 @@ void main() {
     );
     expect(reading(20.00000001).reading, '20%');
   });
-  testWidgets('Home stacks five readings with details and navigation to Lab', (
-    tester,
-  ) async {
-    SharedPreferences.setMockInitialValues({});
-    final c = PlantController(
-      LocalRepository(await SharedPreferences.getInstance()),
-      PlantData()
-        ..onboarded = true
-        ..reducedMotion = true,
-    );
-    tester.view.physicalSize = const Size(440, 1000);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    await tester.pumpWidget(PlantHeartApp(controller: c));
-    await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(
-      find.text('Plant conditions'),
-      250,
-      scrollable: find.byType(Scrollable).first,
-    );
-    final y = <double>[];
-    for (final id in ['moisture', 'light', 'temperature', 'humidity', 'ph']) {
-      final card = find.byKey(ValueKey('gauge-$id'));
-      await tester.scrollUntilVisible(
-        card,
-        180,
-        scrollable: find.byType(Scrollable).first,
+  testWidgets(
+    'Home shows all compact readings without scrolling and opens detail ranges',
+    (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final c = PlantController(
+        LocalRepository(await SharedPreferences.getInstance()),
+        PlantData()
+          ..onboarded = true
+          ..reducedMotion = true,
+      );
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(PlantHeartApp(controller: c));
+      await tester.pumpAndSettle();
+      expect(find.byType(CompactSensorStatus), findsNWidgets(5));
+      final y = <double>[];
+      for (final id in ['moisture', 'light', 'temperature', 'humidity', 'ph']) {
+        final card = find.byKey(ValueKey('compact-$id'));
+        expect(card.hitTestable(), findsOneWidget);
+        y.add(tester.getTopLeft(card).dy);
+        expect(
+          tester.getBottomLeft(card).dy,
+          lessThan(tester.getTopLeft(find.byType(NavigationBar)).dy),
+        );
+      }
+      for (var i = 1; i < y.length; i++) {
+        expect(y[i], greaterThan(y[i - 1]));
+      }
+      await tester.tap(find.byKey(const ValueKey('compact-moisture')));
+      await tester.pumpAndSettle();
+      expect(find.text('Soil moisture'), findsWidgets);
+      expect(find.textContaining('30–65% (inclusive)'), findsOneWidget);
+      await tester.tap(find.text('Got it'));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.text('Lab'),
+        ),
       );
       await tester.pumpAndSettle();
-      expect(card, findsOneWidget);
-      final scroll = tester
-          .state<ScrollableState>(find.byType(Scrollable).first)
-          .position
-          .pixels;
-      y.add(tester.getTopLeft(card).dy + scroll);
-      if (id == 'moisture') {
-        await tester.tap(find.byTooltip('Soil moisture range details'));
-        await tester.pumpAndSettle();
-        expect(find.text('Soil moisture ranges'), findsOneWidget);
-        expect(find.textContaining('30–65% (inclusive)'), findsOneWidget);
-        await tester.tap(find.text('Got it'));
-        await tester.pumpAndSettle();
-      }
-    }
-    for (var i = 1; i < y.length; i++) {
-      expect(y[i], greaterThan(y[i - 1]));
-    }
-    await tester.scrollUntilVisible(
-      find.text('Change readings in Lab'),
-      180,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Change readings in Lab').hitTestable(), findsOneWidget);
-    await tester.tap(find.text('Change readings in Lab').hitTestable());
-    await tester.pumpAndSettle();
-    expect(find.text('A tiny plant lab.'), findsOneWidget);
-    await tester.pumpWidget(const SizedBox());
-    c.dispose();
-  });
+      expect(find.text('A tiny plant lab.'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+      c.dispose();
+    },
+  );
   testWidgets(
     'status cards remain readable at narrow width with large text and extreme readings',
     (tester) async {

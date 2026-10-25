@@ -21,6 +21,7 @@ Future<void> main(List<String> arguments) async {
         controller: PlantController(
           repository,
           loaded.data,
+          collection: loaded.collection,
           notice: loaded.warning,
         ),
       ),

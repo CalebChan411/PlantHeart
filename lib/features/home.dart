@@ -1,233 +1,345 @@
+import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../app/plant_controller.dart';
+import '../models/sensor_gauge.dart';
+import '../widgets/compact_sensor_status.dart';
 import '../widgets/design.dart';
 import '../widgets/milo.dart';
-import '../widgets/sensor_status.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   final PlantController controller;
   final void Function(int) select;
-  final VoidCallback openCare, openWeather;
+  final VoidCallback openCare, openWeather, editProfile;
   const HomePage({
     super.key,
     required this.controller,
     required this.select,
     required this.openCare,
     required this.openWeather,
+    required this.editProfile,
   });
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int direction = 1;
+  PlantController get c => widget.controller;
+  void step(int delta) {
+    setState(() => direction = delta);
+    unawaited(
+      c.stepPlant(delta).then((saved) {
+        if (!saved && mounted) feedback(context, false, '');
+      }),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final d = controller.data, emotion = controller.emotion;
-    final tip = controller.care.first;
-    final hour = controller.clock().hour;
-    final greeting = hour < 12
-        ? 'Good morning'
-        : hour < 18
-        ? 'Good afternoon'
-        : 'Good evening';
-    return PageBody(
-      eyebrow: 'A LITTLE CARE GOES A LONG WAY',
-      title: '$greeting,\nlet’s grow a little.',
-      subtitle: '${d.name} is happy you’re here.',
-      children: [
-        SoftCard(
-          color: mint,
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.spa_rounded, color: leaf, size: 20),
-                  const SizedBox(width: 7),
-                  const Expanded(
-                    child: Text(
-                      'YOUR PLANT PAL',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.2,
-                        fontSize: 10,
-                      ),
-                    ),
-                  ),
-                  Tag(emotion.mood, color: Colors.white),
-                ],
-              ),
-              Milo(
-                mood: emotion.mood,
-                name: d.name,
-                reducedMotion: d.reducedMotion,
-              ),
-              Text(d.name, style: Theme.of(context).textTheme.headlineMedium),
-              Text(
-                d.profile.name,
-                style: const TextStyle(color: Color(0xFF52664F)),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: .8),
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Text(
-                  emotion.mood == 'Thirsty'
-                      ? '“A little soil check? My pot is feeling dry.”'
-                      : emotion.mood == 'Sleepy'
-                      ? '“A gentler spot would help me perk up.”'
-                      : '“No rush. We’re growing at our own pace.”',
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ],
-          ),
-        ),
-        ...plantConditionSections(data: d, openLab: () => select(1)),
-        SoftCard(
-          color: sun,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'ONE SMALL THING',
-                style: TextStyle(
-                  fontSize: 10,
-                  letterSpacing: 1.5,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(tip.title, style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 6),
-              Text(tip.action),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: openCare,
-                icon: const Icon(Icons.arrow_forward_rounded),
-                label: const Text('Open Care Guide'),
-              ),
-            ],
-          ),
-        ),
-        const SectionTitle('Little moments, big roots'),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            ActionChip(
-              avatar: const Icon(Icons.chat_bubble_outline_rounded),
-              label: Text('Talk to ${d.name}'),
-              onPressed: () => select(2),
-            ),
-            ActionChip(
-              avatar: const Icon(Icons.tune_rounded),
-              label: const Text('Sensor Lab'),
-              onPressed: () => select(1),
-            ),
-            ActionChip(
-              avatar: const Icon(Icons.auto_stories_outlined),
-              label: const Text('Our journey'),
-              onPressed: () => select(3),
-            ),
-            ActionChip(
-              avatar: const Icon(Icons.wb_sunny_outlined),
-              label: const Text('Weather'),
-              onPressed: openWeather,
-            ),
-          ],
-        ),
-        if (d.checkIns)
-          SoftCard(
+    final data = c.data;
+    final reduced =
+        data.reducedMotion || MediaQuery.disableAnimationsOf(context);
+    final scale = MediaQuery.textScalerOf(context).scale(12) / 12;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Normal phone and desktop sizes use a fixed overview with no scrollable.
+        // Extremely small windows / very large accessibility fonts retain a
+        // fallback rather than clipping controls or shrinking text to unreadable size.
+        final minimum = scale > 1.6
+            ? 1200.0
+            : scale > 1.3
+            ? 950.0
+            : scale > 1.15 && constraints.maxWidth < 400
+            ? 900.0
+            : 560.0;
+        final height = math.max(constraints.maxHeight, minimum);
+        final fallback = constraints.maxHeight < minimum;
+        Widget allocateHero(Widget child) => fallback
+            ? SizedBox(height: 300, child: child)
+            : Expanded(child: child);
+        final overview = SizedBox(
+          height: fallback ? null : height,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: fallback ? MainAxisSize.min : MainAxisSize.max,
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.favorite_rounded, color: leaf),
-                    const SizedBox(width: 10),
                     Expanded(
-                      child: Text(
-                        'Your daily little check-in',
-                        style: Theme.of(context).textTheme.titleMedium,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'My plants',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          Text(
+                            '${c.plants.length} ${c.plants.length == 1 ? 'companion' : 'companions'} · simulated',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF68776B),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+                    if (data.checkIns)
+                      if (scale > 1.3)
+                        IconButton.filledTonal(
+                          tooltip: c.checkedToday
+                              ? 'Care check recorded'
+                              : 'Daily care check',
+                          onPressed: c.checkedToday
+                              ? null
+                              : () => reportSave(
+                                  context,
+                                  c.checkIn(),
+                                  'Daily care check recorded.',
+                                ),
+                          icon: Icon(
+                            c.checkedToday
+                                ? Icons.check_circle_outline_rounded
+                                : Icons.favorite_border_rounded,
+                          ),
+                        )
+                      else
+                        FilledButton.tonalIcon(
+                          onPressed: c.checkedToday
+                              ? null
+                              : () => reportSave(
+                                  context,
+                                  c.checkIn(),
+                                  'Daily care check recorded.',
+                                ),
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size(48, 44),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                          ),
+                          icon: Icon(
+                            c.checkedToday
+                                ? Icons.check_circle_outline_rounded
+                                : Icons.favorite_border_rounded,
+                            size: 17,
+                          ),
+                          label: Text(
+                            c.checkedToday ? 'Checked' : 'Check in',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  '${d.checkInDays.length} care days together. Read the care tip, then check in. This records a visit, not real watering.',
-                ),
-                const SizedBox(height: 14),
-                LinearProgressIndicator(
-                  value: controller.checkedToday ? 1 : 0,
-                  minHeight: 7,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                const SizedBox(height: 14),
-                FilledButton.icon(
-                  onPressed: controller.checkedToday
-                      ? null
-                      : () async {
-                          await reportSave(
-                            context,
-                            controller.checkIn(),
-                            'Daily care check recorded.',
-                          );
-                        },
-                  icon: Icon(
-                    controller.checkedToday
-                        ? Icons.check_circle_rounded
-                        : Icons.favorite_border_rounded,
+                const SizedBox(height: 4),
+                allocateHero(
+                  Column(
+                    children: [
+                      Expanded(
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Positioned.fill(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 38,
+                                ),
+                                child: AnimatedSwitcher(
+                                  key: ValueKey('plant-carousel-$reduced'),
+                                  duration: reduced
+                                      ? Duration.zero
+                                      : const Duration(milliseconds: 320),
+                                  transitionBuilder: (child, animation) =>
+                                      FadeTransition(
+                                        opacity: animation,
+                                        child: SlideTransition(
+                                          position:
+                                              Tween<Offset>(
+                                                begin: Offset(
+                                                  (child.key ==
+                                                              ValueKey(
+                                                                c.activePlantId,
+                                                              )
+                                                          ? direction
+                                                          : -direction) *
+                                                      .16,
+                                                  0,
+                                                ),
+                                                end: Offset.zero,
+                                              ).animate(
+                                                CurvedAnimation(
+                                                  parent: animation,
+                                                  curve: Curves.easeOutCubic,
+                                                ),
+                                              ),
+                                          child: child,
+                                        ),
+                                      ),
+                                  child: Milo(
+                                    key: ValueKey(c.activePlantId),
+                                    name: data.name,
+                                    species: data.species,
+                                    mood: c.emotion.mood,
+                                    reducedMotion: reduced,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: IconButton.filledTonal(
+                                tooltip: 'Previous plant',
+                                onPressed: c.plants.length > 1
+                                    ? () => step(-1)
+                                    : null,
+                                style: IconButton.styleFrom(
+                                  minimumSize: const Size(44, 44),
+                                  backgroundColor: mint,
+                                ),
+                                icon: const Icon(Icons.chevron_left_rounded),
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: IconButton.filledTonal(
+                                tooltip: 'Next plant',
+                                onPressed: c.plants.length > 1
+                                    ? () => step(1)
+                                    : null,
+                                style: IconButton.styleFrom(
+                                  minimumSize: const Size(44, 44),
+                                  backgroundColor: mint,
+                                ),
+                                icon: const Icon(Icons.chevron_right_rounded),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 12,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: c.plants.length <= 7
+                              ? [
+                                  for (final plant in c.plants)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 3,
+                                      ),
+                                      child: Container(
+                                        width: 6,
+                                        height: 6,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: plant.id == c.activePlantId
+                                              ? leaf
+                                              : const Color(0xFFCDD5C9),
+                                        ),
+                                      ),
+                                    ),
+                                ]
+                              : [
+                                  Text(
+                                    '${c.activePlantIndex + 1} / ${c.plants.length}',
+                                    style: const TextStyle(fontSize: 10),
+                                  ),
+                                ],
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              data.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.titleLarge,
+                            ),
+                          ),
+                          IconButton(
+                            tooltip: 'Edit ${data.name}',
+                            onPressed: widget.editProfile,
+                            icon: const Icon(Icons.edit_outlined, size: 17),
+                            style: IconButton.styleFrom(
+                              minimumSize: const Size(36, 36),
+                              padding: const EdgeInsets.all(6),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        '${data.profile.name} · ${c.emotion.mood}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF68776B),
+                        ),
+                      ),
+                    ],
                   ),
-                  label: Text(
-                    controller.checkedToday
-                        ? 'Today’s care check is done'
-                        : 'I’ve checked on my plant',
-                  ),
                 ),
-              ],
-            ),
-          ),
-        SoftCard(
-          color: sky,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Growing together',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Text('${d.stage} · ${d.memories.length} memories planted'),
-              if (d.activities.isNotEmpty) ...[
                 const SizedBox(height: 8),
-                Text(d.activities.last.text),
-                Text(
-                  dateLabel(d.activities.last.at),
-                  style: const TextStyle(fontSize: 12),
+                for (final gauge in sensorGauges(data)) ...[
+                  CompactSensorStatus(
+                    key: ValueKey('compact-${gauge.id}'),
+                    gauge: gauge,
+                  ),
+                  if (gauge.id != 'ph') const SizedBox(height: 6),
+                ],
+                const SizedBox(height: 8),
+                Material(
+                  color: const Color(0xFFFFF0CA),
+                  borderRadius: BorderRadius.circular(16),
+                  child: InkWell(
+                    onTap: widget.openCare,
+                    borderRadius: BorderRadius.circular(16),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.spa_outlined, size: 18, color: leaf),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  c.care.first.title,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const Text(
+                                  'Care Guide · tap for advice',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xFF68776B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.chevron_right_rounded, size: 20),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ],
-            ],
-          ),
-        ),
-        ExpansionTile(
-          title: const Text('Behind this little mood'),
-          tilePadding: EdgeInsets.zero,
-          children: [
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                Tag('Comfort ${emotion.comfort}'),
-                Tag('Vitality ${emotion.vitality}'),
-                Tag('Attachment ${emotion.attachment}'),
-                Tag('Loneliness ${emotion.loneliness}'),
-              ],
             ),
-            const SizedBox(height: 12),
-            Text(emotion.explanation),
-          ],
-        ),
-      ],
+          ),
+        );
+        return constraints.maxHeight >= minimum
+            ? overview
+            : SingleChildScrollView(child: overview);
+      },
     );
   }
 }

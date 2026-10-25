@@ -19,8 +19,8 @@ class SettingsPage extends StatelessWidget {
             context,
             title,
             section == 'reset'
-                ? 'This erases the app’s current profile, chats, memories, journal, posts, history and preferences on this device. First-run setup will return. Recovery backups, if any, are retained.'
-                : 'This deletes the selected local data. It cannot be undone.',
+                ? 'This erases ALL plants and their profiles, chats, memories, journals, posts, history and preferences on this device. First-run setup will return. Recovery backups, if any, are retained.'
+                : 'This deletes the selected data for ${d.name} only. Other plants are kept. It cannot be undone.',
           ) &&
           context.mounted) {
         final ok = await controller.clear(section);
@@ -70,9 +70,9 @@ class SettingsPage extends StatelessWidget {
                 onChanged: (v) => controller.change(() => d.reducedMotion = v),
               ),
               SwitchListTile(
-                title: const Text('Daily check-in card'),
+                title: const Text('Daily check-in button'),
                 subtitle: const Text(
-                  'An in-app reminder on Home. No system notifications.',
+                  'Show the check-in action on Home. No system notifications.',
                 ),
                 value: d.checkIns,
                 onChanged: (v) => controller.change(() => d.checkIns = v),
