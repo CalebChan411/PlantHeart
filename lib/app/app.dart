@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../features/chat.dart';
+import '../features/community/community.dart';
 import '../features/add_plant.dart';
 import '../features/expression_screen/expression_screen.dart';
 import '../features/garden.dart';

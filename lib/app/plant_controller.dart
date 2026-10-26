@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../models/plant_data.dart';
 import '../models/plant_collection.dart';
 import '../models/expression_frame.dart';
+import '../services/neighbourhood.dart';
 import 'pixel_display_controller.dart';
 import '../services/engines.dart';
 import '../services/local_repository.dart';
@@ -279,10 +280,30 @@ class PlantController extends ChangeNotifier {
       target.liked = !target.liked;
     }
   });
+  Future<bool> exchangeWith(NearbyPlant neighbour) => change(() {
+    data.plantExchanges.add(
+      makePlantExchange(entry('').id, clock(), data, neighbour),
+    );
+    if (data.plantExchanges.length > 60) data.plantExchanges.removeAt(0);
+  });
+  Future<bool> addDemoStory() => change(() {
+    data.demoStoryAt ??= clock();
+  });
+  Future<bool> createDemoMovie() {
+    if (data.demoStoryAt == null) return Future.value(false);
+    return change(() => data.demoMovieAt ??= clock());
+  }
+
+  Future<bool> removeDemoStory() => change(() {
+    data.demoStoryAt = null;
+    data.demoMovieAt = null;
+  });
   Future<bool> clear(String section) => change(() {
     switch (section) {
       case 'memories':
         data.memories.clear();
+        data.demoStoryAt = null;
+        data.demoMovieAt = null;
       case 'chat':
         data.messages.clear();
       case 'history':
@@ -301,6 +322,7 @@ class PlantController extends ChangeNotifier {
       'Plant Heart · local data only · ${plants.length} plants\nSelected: ${data.name} · ${data.profile.name}\n'
       '${data.memories.length} memories · ${data.milestones.length} milestones\n'
       '${data.messages.length} chat messages · ${data.snapshots.length} snapshots\n'
+      '${data.plantExchanges.length} plant conversations · ${data.demoStoryAt == null ? 0 : 1} demo stories · ${data.demoMovieAt == null ? 0 : 1} demo films\n'
       '${data.posts.where((p) => !p.sample).length} local posts · ${data.checkInDays.length} care days\n'
       'Stored on this device using shared preferences; not encrypted or cloud backed up.\n'
       'Sharing and check-in preferences do not enable network sharing or system notifications.';

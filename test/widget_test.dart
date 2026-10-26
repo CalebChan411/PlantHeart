@@ -148,6 +148,9 @@ void main() {
       await nav(tester, 'Care');
       expect(find.text('Soil moisture is low'), findsOneWidget);
       await nav(tester, 'Community');
+      await tester.tap(find.text('Feed'));
+      await tester.pumpAndSettle();
+      await reveal(tester, find.text('Create local post'));
       expect(find.text('Create local post'), findsOneWidget);
     },
   );

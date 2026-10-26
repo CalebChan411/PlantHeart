@@ -48,3 +48,11 @@ destinations. Sensor, conversation, weather and expression testing live in More
 popups and can be hidden with a build-time switch. Typed conversation is explicitly
 a substitute for future voice input; no speech-recognition integration is claimed.
 Social activity remains device-local despite having its own destination.
+
+Community/memoir follow-up: the offline UI now includes a searchable schematic
+map, five fictional neighbouring PlantHearts with shared readings/journals,
+automatic deterministic peer conversations and mutual care observations. Six
+illustrated demo memories and an embedded seed-to-bloom MP4 demonstrate the
+growth-to-film experience. These remain local simulations: map/GPS/device
+discovery, authenticated sharing, autonomous online AI, camera capture and film
+encoding from real growth photos are not implemented. See `COMMUNITY_DEMO.md`.

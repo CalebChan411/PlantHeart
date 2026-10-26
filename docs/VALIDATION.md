@@ -271,3 +271,65 @@ native accessibility report.
 Source publication requires explicit user approval, separately from environment
 publication. The user approved publication of this update after reviewing its
 changes and validation results.
+
+## Nearby community, automatic peer conversations and bloom films
+
+The community now has Nearby, Plant talk and Feed sections. The map and all five
+neighbours are fictional fixtures, with searchable distances and shared profiles.
+Peer conversations use species-aware care rules and shared fixture journals.
+Memoir can load six clearly labelled illustrated checkpoints and save a film
+entry that plays a bundled 18-second seed-to-bloom MP4 inside the application.
+This is pre-rendered demo footage, not runtime encoding from personal photos.
+
+Executed checks (2026-10-26):
+
+- `flutter analyze`: **no issues**; formatter and `git diff --check` clean.
+- `flutter test --reporter expanded`: **61 passed**, zero failures/skips
+  (38 unit/service/transport checks and 23 widget checks).
+- Product-tools-hidden flag run: **1 passed** with
+  `--dart-define=PLANT_HEART_TEST_TOOLS=false`.
+- Search tests cover all radius counts, case-insensitive query, species/owner
+  search, care-only filtering, empty results and nearest-first order.
+- Peer tests exercise mutual species-aware observations, privacy exclusion,
+  a 60-exchange limit, no private-memory/check-in/sensor changes, per-plant
+  isolation, reload, timed progression, stopping on navigation and backgrounding.
+- Story tests exercise date anchoring, idempotent creation, remove/clear behavior,
+  unchanged real care/stage/memories, per-plant persistence and malformed-record
+  recovery while retaining the original stored document.
+- Player widget checks exercise local asset loading, no autoplay, play/pause,
+  chapter seeking, replay, background pause, asynchronous disposal, decoder-error
+  retry and an error arriving after initialization. Narrow larger-text workflows
+  cover Community, Plant talk and Memoir.
+- `flutter build web --release --no-web-resources-cdn`: **passed**. The existing
+  unused Cupertino font-subset notice remains informational.
+- `ffprobe`: actual H.264 Constrained Baseline, 960×540, YUV420P, **18.000 s**;
+  no audio track. Asset generation is reproducible through the included Python
+  development renderer. No encoder or Python dependency is added to app runtime.
+- Completed Chromium release workflow: filtered the demo map by radius, owner
+  and care condition; selected Pip and opened its journal/status; ran a full
+  three-neighbour automatic round; verified stopping after leaving; added demo
+  memories and a film entry; decoded the actual MP4; played, paused, sought to
+  15 seconds, reached the end, replayed, closed the player, reloaded and verified
+  saved story/film/peer records. **Zero JavaScript page errors and zero external
+  network requests** in the completed workflow.
+- The video stays above a separately scrolling chapter list. Actual browser
+  seeking uses a static host with HTTP byte-range support. The earlier basic
+  Python server returned a zero-length seekable range despite buffering all
+  18 seconds; a range-capable host verified actual seeking and replay. Windows
+  playback uses a bundled local asset rather than that HTTP path. Flutter browser
+  semantics overlays require accessibility actions for some automated clicks;
+  widget checks also exercise the controls through Flutter pointer taps.
+- Real application captures are in `docs/screenshots/community-demo`; the MP4
+  and six original checkpoint illustrations are in `assets/demo_growth`.
+
+Dependencies: `video_player` 2.10.1 and `video_player_win` 3.3.1 plus their locked
+transitive dependencies; generated Windows registration includes the plugin.
+The Linux host cannot compile/run Windows Media Foundation. Native Windows video
+playback, the independent native expression window and the prior AXTree report
+still need verification on Windows. Live discovery/GPS/maps, real social accounts,
+LLM-driven autonomous chat, camera capture and encoding films from real photos
+remain future integrations. See `COMMUNITY_DEMO.md` for the demonstration guide.
+
+Source publication requires explicit user approval after reviewing the changes.
+The user approved publication of this update after reviewing its changes and
+validation results.

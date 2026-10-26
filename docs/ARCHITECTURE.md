@@ -89,3 +89,20 @@ facial motion. The frame carries no message text. Native loopback and web
 same-origin storage transport remain read-only from the viewer's perspective.
 See `PIXEL_DISPLAY.md` for version compatibility, disconnect handling and hardware
 boundaries, and `PRODUCT_NAVIGATION.md` for the testing workflow.
+
+## Community and demo growth
+
+Neighbourhood fixtures and a pure search/peer-review service feed the Community
+map, shared profile and timed conversation pages. The conversation page owns
+its short-lived foreground timer; leaving, pausing, plant switching or background
+lifecycle events cancel it. Prepared exchanges use the existing ordered storage
+queue and are capped at 60 per plant. They remain separate from private messages,
+memories and check-in accounting.
+
+Optional story/film dates anchor six read-only demo checkpoints in Memoir. They
+record a fictional flowering plant, not an observed change in the selected plant.
+Film creation saves a reference to original bundled MP4 footage. A dedicated
+viewer owns/disposes its video controller, handles errors and pauses on app
+background. Windows Media Foundation and browser video implementations are
+registered through Flutter plugins. See `COMMUNITY_DEMO.md` for media generation,
+compatibility, persistence and unimplemented live-service boundaries.

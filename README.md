@@ -38,9 +38,13 @@ offline. There is no backend to start and no `.env` or secret configuration.
 - **First run:** plant name, species and personality; optional defaults; locally saved.
 - **Home:** animated plants with arrow switching, five compact readings visible
   together, direct care advice and earned daily care check-ins.
-- **Community:** local posts, likes, virtual visits and an earned three-day challenge.
+- **Community:** a searchable illustrated neighbourhood map with five demo
+  PlantHearts, shared readings/journals, automatic plant-to-plant conversations,
+  and a Feed with local posts, likes, visits and the care challenge.
 - **Memoir:** memories and growth journey; add/edit/confirmed delete, timestamps,
-  lifecycle selection, activity timeline and copyable journey summary.
+  lifecycle selection, activity timeline and copyable journey summary. Add six
+  illustrated demo growth memories and create a saved entry for an embedded
+  18-second seed-to-bloom sample film with play/pause, seek and replay.
 - **Care:** species-aware recommendations based on the selected plant's readings.
 - **More:** plant library and settings, plus a separate **Prototype testing** area.
   Sensor, conversation, weather and pixel-display tools each open in a closable
@@ -108,8 +112,9 @@ updates; no background emotion scheduler or proactive dialogue is implemented.
 
 Future scope: physical pot/firmware, BLE/device connection, battery/power, live
 weather, cloud profiles, authenticated family sharing, encryption, LLM/RAG/vector
-memory, voice/TTS, camera/photos, time-lapse/memorial video and native mobile builds.
-Photo checkpoints currently use honest text milestones. Windows native execution
+memory, voice/TTS, camera/photos, movies from real growth photos and native mobile builds.
+Personal photo checkpoints currently use text milestones; the bloom demo uses
+original bundled illustrations and pre-rendered MP4 footage. Windows native execution
 must still be verified on Windows; it cannot run on this Linux cloud host.
 
 
@@ -153,3 +158,12 @@ journey and care records; the selection survives restart. Three species have
 distinct original vector foliage. Existing single-plant data is preserved and
 backed up before the first version-2 collection write. Earlier app versions do
 not read the new collection format. See [collection and migration details](docs/PLANT_COLLECTION.md).
+
+## Community and bloom-film demo
+
+Use **Community → Nearby / Plant talk / Feed** and **Memoir → Films**. The map is
+a fictional local illustration with simulated distances; plant conversations use
+shared demo logs and local rules. The bloom film is a real offline MP4 player
+using bundled, illustrated sample footage. Creating the demo film saves its entry;
+runtime photo-based encoding is not implemented. See the [demo walkthrough and
+Windows player details](docs/COMMUNITY_DEMO.md).

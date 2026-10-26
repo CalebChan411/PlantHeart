@@ -189,9 +189,9 @@ class LibraryPage extends StatelessWidget {
   );
 }
 
-class CommunityPage extends StatelessWidget {
+class CommunityFeed extends StatelessWidget {
   final PlantController controller;
-  const CommunityPage({super.key, required this.controller});
+  const CommunityFeed({super.key, required this.controller});
   @override
   Widget build(BuildContext context) => PageBody(
     title: 'Good things\ngrow together.',

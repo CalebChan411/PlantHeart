@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'plant_exchange.dart';
 
 const personalities = ['Gentle', 'Playful', 'Thoughtful'];
 const lifeStages = [
@@ -213,6 +214,8 @@ class PlantData {
   List<Snapshot> snapshots = [];
   List<String> checkInDays = [];
   List<LocalPost> posts = [];
+  List<PlantExchange> plantExchanges = [];
+  DateTime? demoStoryAt, demoMovieAt;
   PlantProfile get profile => plantProfiles.firstWhere((p) => p.id == species);
 
   Map<String, dynamic> toJson() => {
@@ -238,6 +241,9 @@ class PlantData {
     'snapshots': snapshots.map((v) => v.toJson()).toList(),
     'checkInDays': checkInDays,
     'posts': posts.map((v) => v.toJson()).toList(),
+    'plantExchanges': plantExchanges.map((v) => v.toJson()).toList(),
+    'demoStoryAt': demoStoryAt?.toIso8601String(),
+    'demoMovieAt': demoMovieAt?.toIso8601String(),
   };
 
   factory PlantData.decode(String raw) {
@@ -281,6 +287,12 @@ class PlantData {
     d.activities = _list(j['activities'], Entry.fromJson);
     d.snapshots = _list(j['snapshots'], Snapshot.fromJson);
     d.posts = _list(j['posts'], LocalPost.fromJson);
+    d.plantExchanges = _list(j['plantExchanges'], PlantExchange.fromJson);
+    d.demoStoryAt = _optionalDate(j['demoStoryAt']);
+    d.demoMovieAt = _optionalDate(j['demoMovieAt']);
+    if (d.demoMovieAt != null && d.demoStoryAt == null) {
+      throw const FormatException('A demo movie must have a story');
+    }
     if (j['checkInDays'] is List) {
       d.checkInDays = (j['checkInDays'] as List)
           .whereType<String>()
@@ -299,4 +311,12 @@ List<T> _list<T>(dynamic raw, T Function(Map<String, dynamic>) parse) {
   if (raw == null) return [];
   if (raw is! List) throw const FormatException('Expected a list');
   return raw.map((v) => parse(Map<String, dynamic>.from(v as Map))).toList();
+}
+
+DateTime? _optionalDate(dynamic value) {
+  if (value == null) return null;
+  if (value is! String || DateTime.tryParse(value) == null) {
+    throw const FormatException('Invalid story date');
+  }
+  return DateTime.parse(value);
 }
